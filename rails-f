@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+# Rails Frontend CLI wrapper script (kısa isim)
+# Bu script rails_frontend_setup.rb dosyasını çağırır
+
+script_dir = File.expand_path(File.dirname(__FILE__))
+main_script = File.join(script_dir, 'rails_frontend_setup.rb')
+
+require main_script
+
+cli = RailsFrontendCLI.new
+cli.calistir(ARGV)

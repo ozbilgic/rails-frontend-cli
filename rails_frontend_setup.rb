@@ -1,0 +1,705 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'fileutils'
+require 'optparse'
+
+class RailsFrontendCLI
+  VERSION = "1.0.0"
+
+  def initialize
+    @proje_adi = nil
+    @sayfa_adi = nil
+    @komut = nil
+  end
+
+  def calistir(args)
+    if args.empty?
+      yardim_goster
+      exit 0
+    end
+
+    @komut = args[0]
+
+    case @komut
+    when 'new', 'n'
+      @proje_adi = args[1]
+      if @proje_adi.nil? || @proje_adi.empty?
+        hata_mesaji("Proje adı belirtilmedi. Kullanım: rails-frontend new PROJE_ADI")
+      end
+      yeni_proje_olustur
+    when 'add-page', 'ap'
+      @sayfa_adi = args[1]
+      if @sayfa_adi.nil? || @sayfa_adi.empty?
+        hata_mesaji("Sayfa adı belirtilmedi. Kullanım: rails-frontend add-page SAYFA_ADI")
+      end
+      sayfa_ekle
+    when 'delete-page', 'dp'
+      @sayfa_adi = args[1]
+      if @sayfa_adi.nil? || @sayfa_adi.empty?
+        hata_mesaji("Sayfa adı belirtilmedi. Kullanım: rails-frontend delete-page SAYFA_ADI")
+      end
+      sayfa_sil
+    when 'run', 'r'
+      server_calistir
+    when 'version', '-v', '--version'
+      puts "Rails Frontend CLI v#{VERSION}"
+      exit 0
+    when 'help', '-h', '--help'
+      yardim_goster
+      exit 0
+    else
+      hata_mesaji("Bilinmeyen komut: #{@komut}")
+    end
+  end
+
+  private
+
+  def yeni_proje_olustur
+    baslik_goster("Yeni Rails Frontend Projesi Oluşturuluyor: #{@proje_adi}")
+
+    # Rails projesinin zaten var olup olmadığını kontrol et
+    if Dir.exist?(@proje_adi)
+      hata_mesaji("'#{@proje_adi}' dizini zaten mevcut!")
+    end
+
+    # Adım 1: Rails projesi oluştur
+    adim_goster(1, "Rails 8+ projesi oluşturuluyor...")
+    unless system("rails new #{@proje_adi} --css=tailwind --javascript=importmap")
+      hata_mesaji("Rails projesi oluşturulamadı!")
+    end
+    basari_mesaji("Rails projesi oluşturuldu")
+
+    # Proje dizinine geç
+    proje_dizini = File.expand_path(@proje_adi)
+    Dir.chdir(proje_dizini) do
+      # Adım 2: Home controller ve view oluştur
+      adim_goster(2, "Home controller ve view oluşturuluyor...")
+      olustur_home_controller
+      basari_mesaji("Home controller ve view oluşturuldu")
+
+      # Adım 3: Shared componentler oluştur
+      adim_goster(3, "Shared componentler oluşturuluyor...")
+      olustur_shared_componentler
+      basari_mesaji("Shared componentler oluşturuldu")
+
+      # Adım 4: CSS dosyaları oluştur
+      adim_goster(4, "CSS dosyaları oluşturuluyor...")
+      olustur_css_dosyalari
+      basari_mesaji("CSS dosyaları oluşturuldu")
+
+      # Adım 5: Stimulus controller oluştur
+      adim_goster(5, "Stimulus controller oluşturuluyor...")
+      olustur_stimulus_controller('home')
+      basari_mesaji("Stimulus controller oluşturuldu")
+
+      # Adım 6: Asset klasörleri oluştur
+      adim_goster(6, "Asset klasörleri oluşturuluyor...")
+      olustur_asset_klasorleri
+      basari_mesaji("Asset klasörleri oluşturuldu")
+
+      # Adım 7: Layout dosyasını güncelle
+      adim_goster(7, "Layout dosyası güncelleniyor...")
+      guncelle_layout
+      basari_mesaji("Layout dosyası güncellendi")
+
+      # Adım 8: Routes yapılandır
+      adim_goster(8, "Routes yapılandırılıyor...")
+      guncelle_routes('home', 'index', root: true)
+      basari_mesaji("Routes yapılandırıldı")
+
+      # Adım 9: Tailwind yapılandırmasını güncelle
+      adim_goster(9, "Tailwind yapılandırması güncelleniyor...")
+      guncelle_tailwind_config
+      basari_mesaji("Tailwind yapılandırması güncellendi")
+    end
+
+    tamamlandi_mesaji
+  end
+
+  def sayfa_ekle
+    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    baslik_goster("Yeni Sayfa Ekleniyor: #{@sayfa_adi}")
+
+    # Sayfa adını normalize et (türkçe karakterleri değiştir)
+    sayfa_adi_normalized = normalize_isim(@sayfa_adi)
+
+    # Adım 1: View oluştur (home klasöründe)
+    adim_goster(1, "View dosyası oluşturuluyor...")
+    olustur_view(sayfa_adi_normalized)
+    basari_mesaji("View dosyası oluşturuldu")
+
+    # Adım 2: CSS dosyası oluştur
+    adim_goster(2, "CSS dosyası oluşturuluyor...")
+    olustur_css(sayfa_adi_normalized)
+    basari_mesaji("CSS dosyası oluşturuldu")
+
+    # Adım 3: Stimulus controller oluştur
+    adim_goster(3, "Stimulus controller oluşturuluyor...")
+    olustur_stimulus_controller(sayfa_adi_normalized)
+    basari_mesaji("Stimulus controller oluşturuldu")
+
+    # Adım 4: Home controller'a action ekle
+    adim_goster(4, "Home controller güncelleniyor...")
+    home_controller_action_ekle(sayfa_adi_normalized)
+    basari_mesaji("Home controller güncellendi")
+
+    # Adım 5: Route ekle
+    adim_goster(5, "Route ekleniyor...")
+    guncelle_routes(sayfa_adi_normalized, sayfa_adi_normalized)
+    basari_mesaji("Route eklendi")
+
+    puts "\n✅ #{renklendir('Sayfa başarıyla eklendi!', :yesil)}"
+    puts "📄 Sayfa URL: #{renklendir("/#{sayfa_adi_normalized}", :mavi)}"
+  end
+
+  def sayfa_sil
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    baslik_goster("Sayfa Siliniyor: #{@sayfa_adi}")
+
+    sayfa_adi_normalized = normalize_isim(@sayfa_adi)
+
+    # Home/index sayfasını silmeyi engelle
+    if sayfa_adi_normalized == 'home' || sayfa_adi_normalized == 'index'
+      hata_mesaji("Ana sayfa (home/index) silinemez!")
+    end
+
+    # Dosyaların varlığını kontrol et
+    view_path = "app/views/home/#{sayfa_adi_normalized}.html.erb"
+    unless File.exist?(view_path)
+      hata_mesaji("'#{sayfa_adi_normalized}' sayfası bulunamadı!")
+    end
+
+    # Onay al
+    print "#{renklendir('⚠️  Emin misiniz?', :sari)} '#{sayfa_adi_normalized}' sayfası silinecek (y/n): "
+    onay = STDIN.gets.chomp.downcase
+    unless onay == 'y' || onay == 'yes' || onay == 'e' || onay == 'evet'
+      puts "İşlem iptal edildi."
+      exit 0
+    end
+
+    # Adım 1: View dosyasını sil
+    adim_goster(1, "View dosyası siliniyor...")
+    FileUtils.rm_f(view_path)
+    basari_mesaji("View dosyası silindi")
+
+    # Adım 2: CSS dosyasını sil
+    adim_goster(2, "CSS dosyası siliniyor...")
+    FileUtils.rm_f("app/assets/stylesheets/#{sayfa_adi_normalized}.css")
+    basari_mesaji("CSS dosyası silindi")
+
+    # Adım 3: Stimulus controller sil
+    adim_goster(3, "Stimulus controller siliniyor...")
+    FileUtils.rm_f("app/javascript/controllers/#{sayfa_adi_normalized}_controller.js")
+    basari_mesaji("Stimulus controller silindi")
+
+    # Adım 4: Home controller'dan action'ı kaldır
+    adim_goster(4, "Home controller güncelleniyor...")
+    home_controller_action_kaldir(sayfa_adi_normalized)
+    basari_mesaji("Home controller güncellendi")
+
+    # Adım 5: Route'u kaldır
+    adim_goster(5, "Route kaldırılıyor...")
+    kaldir_route(sayfa_adi_normalized)
+    basari_mesaji("Route kaldırıldı")
+
+    puts "\n✅ #{renklendir('Sayfa başarıyla silindi!', :yesil)}"
+  end
+
+  # Helper metodlar
+  def rails_projesi_mi?
+    File.exist?('config/routes.rb') && File.exist?('Gemfile')
+  end
+
+  def server_calistir
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    unless File.exist?('bin/dev')
+      hata_mesaji("bin/dev dosyası bulunamadı! Bu proje Rails 8+ ile oluşturulmamış olabilir.")
+    end
+
+    puts "\n#{renklendir('🚀 Rails server başlatılıyor...', :yesil, bold: true)}"
+    puts "#{renklendir('Durdurmak için Ctrl+C kullanın', :sari)}\n\n"
+    
+    exec('bin/dev')
+  end
+
+  def home_controller_action_ekle(sayfa_adi)
+    controller_path = 'app/controllers/home_controller.rb'
+    return unless File.exist?(controller_path)
+
+    controller_content = File.read(controller_path)
+    
+    # Action zaten varsa ekleme
+    return if controller_content.include?("def #{sayfa_adi}")
+
+    # Son 'end'den önce yeni action ekle
+    yeni_action = "  def #{sayfa_adi}\n  end\n\n"
+    
+    controller_content.gsub!(/^end\s*$/) do |match|
+      "#{yeni_action}#{match}"
+    end
+
+    File.write(controller_path, controller_content)
+  end
+
+  def home_controller_action_kaldir(sayfa_adi)
+    controller_path = 'app/controllers/home_controller.rb'
+    return unless File.exist?(controller_path)
+
+    controller_content = File.read(controller_path)
+    
+    # Action'ı kaldır (def ile end arası)
+    controller_content.gsub!(/\s*def #{sayfa_adi}\s*\n\s*end\s*\n/, '')
+
+    File.write(controller_path, controller_content)
+  end
+
+  def normalize_isim(isim)
+    # Türkçe karakterleri değiştir ve küçük harfe çevir
+    tr_map = {
+      'ç' => 'c', 'Ç' => 'c',
+      'ğ' => 'g', 'Ğ' => 'g',
+      'ı' => 'i', 'İ' => 'i',
+      'ö' => 'o', 'Ö' => 'o',
+      'ş' => 's', 'Ş' => 's',
+      'ü' => 'u', 'Ü' => 'u'
+    }
+    
+    normalized = isim.downcase
+    tr_map.each { |tr, en| normalized.gsub!(tr, en) }
+    normalized.gsub(/[^a-z0-9_]/, '_')
+  end
+
+  def olustur_home_controller
+    controller_content = <<~RUBY
+      class HomeController < ApplicationController
+        def index
+        end
+      end
+    RUBY
+
+    FileUtils.mkdir_p('app/controllers')
+    File.write('app/controllers/home_controller.rb', controller_content)
+
+    # View klasörü ve dosyası oluştur
+    FileUtils.mkdir_p('app/views/home')
+    view_content = <<~HTML
+      <div data-controller="home">
+        <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+          <div class="container mx-auto px-4 py-16">
+            <div class="text-center">
+              <h1 class="text-5xl font-bold text-gray-900 mb-4">
+                Hoş Geldiniz! 👋
+              </h1>
+              <p class="text-xl text-gray-600 mb-8">
+                Rails Frontend CLI ile oluşturuldu
+              </p>
+              <div class="inline-block bg-white rounded-lg shadow-lg p-8">
+                <p class="text-gray-700 mb-4">
+                  Projeniz başarıyla oluşturuldu ve kullanıma hazır!
+                </p>
+                <p class="text-sm text-gray-500">
+                  Tailwind CSS ve Stimulus ile geliştirmeye başlayabilirsiniz.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    HTML
+
+    File.write('app/views/home/index.html.erb', view_content)
+  end
+
+  def olustur_shared_componentler
+    FileUtils.mkdir_p('app/views/shared')
+
+    # Header
+    header_content = <<~HTML
+      <header class="bg-white shadow-sm">
+        <nav class="container mx-auto px-4 py-4">
+          <div class="flex items-center justify-between">
+            <div class="text-2xl font-bold text-indigo-600">
+              Logo
+            </div>
+            <div class="hidden md:flex space-x-6">
+              <%= link_to "Ana Sayfa", root_path, class: "text-gray-700 hover:text-indigo-600 transition" %>
+              <!-- Diğer menü öğeleri buraya eklenecek -->
+            </div>
+          </div>
+        </nav>
+      </header>
+    HTML
+    File.write('app/views/shared/_header.html.erb', header_content)
+
+    # Navbar
+    navbar_content = <<~HTML
+      <!-- Navbar içeriği buraya eklenecek -->
+    HTML
+    File.write('app/views/shared/_navbar.html.erb', navbar_content)
+
+    # Footer
+    footer_content = <<~HTML
+      <footer class="bg-gray-800 text-white py-8 mt-auto">
+        <div class="container mx-auto px-4">
+          <div class="text-center">
+            <p class="text-gray-400">
+              © <%= Time.current.year %> Tüm hakları saklıdır.
+            </p>
+          </div>
+        </div>
+      </footer>
+    HTML
+    File.write('app/views/shared/_footer.html.erb', footer_content)
+  end
+
+  def olustur_css_dosyalari
+    FileUtils.mkdir_p('app/assets/stylesheets')
+
+    # Home CSS
+    home_css = <<~CSS
+      /* Home sayfası özel stilleri */
+      .home-container {
+        /* Buraya home sayfası için özel stiller eklenebilir */
+      }
+    CSS
+    File.write('app/assets/stylesheets/home.css', home_css)
+
+    # Header CSS
+    header_css = <<~CSS
+      /* Header özel stilleri */
+      header {
+        /* Buraya header için özel stiller eklenebilir */
+      }
+    CSS
+    File.write('app/assets/stylesheets/header.css', header_css)
+
+    # Navbar CSS
+    navbar_css = <<~CSS
+      /* Navbar özel stilleri */
+      nav {
+        /* Buraya navbar için özel stiller eklenebilir */
+      }
+    CSS
+    File.write('app/assets/stylesheets/navbar.css', navbar_css)
+
+    # Footer CSS
+    footer_css = <<~CSS
+      /* Footer özel stilleri */
+      footer {
+        /* Buraya footer için özel stiller eklenebilir */
+      }
+    CSS
+    File.write('app/assets/stylesheets/footer.css', footer_css)
+
+    # Application CSS'e import ekle
+    app_css_path = 'app/assets/stylesheets/application.tailwind.css'
+    if File.exist?(app_css_path)
+      app_css = File.read(app_css_path)
+      unless app_css.include?('@import "home.css"')
+        imports = <<~CSS
+
+          /* Sayfa CSS dosyaları */
+          @import "home.css";
+
+          /* Component CSS dosyaları */
+          @import "header.css";
+          @import "navbar.css";
+          @import "footer.css";
+        CSS
+        File.write(app_css_path, app_css + imports)
+      end
+    end
+  end
+
+  def olustur_stimulus_controller(sayfa_adi)
+    FileUtils.mkdir_p('app/javascript/controllers')
+
+    controller_content = <<~JS
+      import { Controller } from "@hotwired/stimulus"
+
+      // #{sayfa_adi.capitalize} sayfası için Stimulus controller
+      export default class extends Controller {
+        connect() {
+          console.log("#{sayfa_adi.capitalize} controller bağlandı")
+        }
+
+        disconnect() {
+          console.log("#{sayfa_adi.capitalize} controller bağlantısı kesildi")
+        }
+
+        // Buraya özel metodlar eklenebilir
+      }
+    JS
+
+    File.write("app/javascript/controllers/#{sayfa_adi}_controller.js", controller_content)
+  end
+
+  def olustur_asset_klasorleri
+    # Images klasörü
+    FileUtils.mkdir_p('app/assets/images')
+    File.write('app/assets/images/.keep', '')
+
+    # Fonts klasörü
+    FileUtils.mkdir_p('app/assets/fonts')
+    File.write('app/assets/fonts/.keep', '')
+  end
+
+  def guncelle_layout
+    layout_path = 'app/views/layouts/application.html.erb'
+    return unless File.exist?(layout_path)
+
+    layout_content = File.read(layout_path)
+
+    # Body içine shared componentleri ekle
+    if layout_content.include?('<body>')
+      yeni_layout = layout_content.gsub(/<body>/) do
+        <<~HTML.chomp
+          <body class="flex flex-col min-h-screen">
+            <%= render 'shared/header' %>
+        HTML
+      end
+
+      # Yield'den sonra footer ekle
+      yeni_layout = yeni_layout.gsub(/\s*<%= yield %>/) do
+        <<~HTML.chomp
+          <main class="flex-grow">
+              <%= yield %>
+            </main>
+            <%= render 'shared/footer' %>
+        HTML
+      end
+
+      File.write(layout_path, yeni_layout)
+    end
+  end
+
+  def guncelle_routes(sayfa_adi, action, root: false)
+    routes_path = 'config/routes.rb'
+    routes_content = File.read(routes_path)
+
+    if root
+      # Root route ekle
+      yeni_route = "  root \"home##{action}\"\n"
+      
+      # Mevcut root route varsa değiştir, yoksa ekle
+      if routes_content.match?(/^\s*root/)
+        routes_content.gsub!(/^\s*root.*$/, yeni_route.strip)
+      else
+        routes_content.gsub!(/Rails\.application\.routes\.draw do\n/) do |match|
+          "#{match}#{yeni_route}"
+        end
+      end
+    else
+      # Normal route ekle (home controller kullan)
+      yeni_route = "  get '/#{sayfa_adi}', to: 'home##{action}'\n"
+      
+      # Route zaten varsa ekleme
+      unless routes_content.include?(yeni_route.strip)
+        routes_content.gsub!(/Rails\.application\.routes\.draw do\n/) do |match|
+          "#{match}#{yeni_route}"
+        end
+      end
+    end
+
+    File.write(routes_path, routes_content)
+  end
+
+  def kaldir_route(sayfa_adi)
+    routes_path = 'config/routes.rb'
+    routes_content = File.read(routes_path)
+
+    # Route satırını kaldır
+    routes_content.gsub!(/^\s*get\s+['"]\/#{sayfa_adi}['"].*\n/, '')
+
+    File.write(routes_path, routes_content)
+  end
+
+  def guncelle_tailwind_config
+    config_path = 'config/tailwind.config.js'
+    return unless File.exist?(config_path)
+
+    config_content = File.read(config_path)
+
+    # Shared klasörünü content'e ekle
+    unless config_content.include?("'./app/views/shared/**/*.html.erb'")
+      config_content.gsub!(/content: \[/) do |match|
+        "#{match}\n    './app/views/shared/**/*.html.erb',"
+      end
+      File.write(config_path, config_content)
+    end
+  end
+
+  def olustur_controller(sayfa_adi)
+    controller_content = <<~RUBY
+      class #{sayfa_adi.capitalize}Controller < ApplicationController
+        def index
+        end
+      end
+    RUBY
+
+    File.write("app/controllers/#{sayfa_adi}_controller.rb", controller_content)
+  end
+
+  def olustur_view(sayfa_adi)
+    # Home klasöründe view oluştur
+    FileUtils.mkdir_p("app/views/home")
+
+    view_content = <<~HTML
+      <div data-controller="#{sayfa_adi}">
+        <div class="container mx-auto px-4 py-16">
+          <h1 class="text-4xl font-bold text-gray-900 mb-4">
+            #{sayfa_adi.capitalize}
+          </h1>
+          <p class="text-gray-600">
+            #{sayfa_adi.capitalize} sayfası içeriği buraya gelecek.
+          </p>
+        </div>
+      </div>
+    HTML
+
+    File.write("app/views/home/#{sayfa_adi}.html.erb", view_content)
+  end
+
+  def olustur_css(sayfa_adi)
+    css_content = <<~CSS
+      /* #{sayfa_adi.capitalize} sayfası özel stilleri */
+      .#{sayfa_adi}-container {
+        /* Buraya #{sayfa_adi} sayfası için özel stiller eklenebilir */
+      }
+    CSS
+
+    File.write("app/assets/stylesheets/#{sayfa_adi}.css", css_content)
+
+    # Application CSS'e import ekle
+    app_css_path = 'app/assets/stylesheets/application.tailwind.css'
+    if File.exist?(app_css_path)
+      app_css = File.read(app_css_path)
+      import_line = "@import \"#{sayfa_adi}.css\";"
+      
+      unless app_css.include?(import_line)
+        # Sayfa CSS dosyaları bölümüne ekle
+        if app_css.include?('/* Sayfa CSS dosyaları */')
+          app_css.gsub!(/\/\* Sayfa CSS dosyaları \*\/\n/) do |match|
+            "#{match}#{import_line}\n"
+          end
+        else
+          app_css += "\n#{import_line}\n"
+        end
+        File.write(app_css_path, app_css)
+      end
+    end
+  end
+
+  # Mesaj metodları
+  def baslik_goster(mesaj)
+    puts "\n" + "=" * 60
+    puts renklendir(mesaj, :mavi, bold: true)
+    puts "=" * 60 + "\n"
+  end
+
+  def adim_goster(numara, mesaj)
+    puts "\n#{renklendir("Adım #{numara}:", :sari)} #{mesaj}"
+  end
+
+  def basari_mesaji(mesaj)
+    puts "  #{renklendir('✓', :yesil)} #{mesaj}"
+  end
+
+  def hata_mesaji(mesaj)
+    puts "\n#{renklendir('✗ HATA:', :kirmizi)} #{mesaj}\n"
+    exit 1
+  end
+
+  def tamamlandi_mesaji
+    puts "\n" + "=" * 60
+    puts renklendir("🎉 Proje başarıyla oluşturuldu!", :yesil, bold: true)
+    puts "=" * 60
+    puts "\n#{renklendir('Sonraki adımlar:', :mavi)}"
+    puts "  1. cd #{@proje_adi}"
+    puts "  2. rails-frontend run  (veya: bin/dev)"
+    puts "  3. Tarayıcıda http://localhost:3000 adresini açın"
+    puts "\n#{renklendir('Yeni sayfa eklemek için:', :mavi)}"
+    puts "  rails-frontend add-page SAYFA_ADI"
+    puts "\n#{renklendir('Sayfa silmek için:', :mavi)}"
+    puts "  rails-frontend delete-page SAYFA_ADI"
+    puts ""
+  end
+
+  def yardim_goster
+    puts <<~HELP
+      #{renklendir('Rails Frontend CLI', :mavi, bold: true)} - v#{VERSION}
+      
+      #{renklendir('Kullanım:', :sari)}
+        rails-frontend KOMUT [ARGÜMANLAR]
+        rails-f KOMUT [ARGÜMANLAR]  (kısa isim)
+
+      #{renklendir('Komutlar:', :sari)}
+        new, n PROJE_ADI              Yeni Rails frontend projesi oluştur
+        add-page, ap SAYFA_ADI        Mevcut projeye yeni sayfa ekle
+        delete-page, dp SAYFA_ADI     Mevcut projeden sayfa sil
+        run, r                        Rails server'ı başlat (bin/dev)
+        version, -v, --version        Versiyon bilgisini göster
+        help, -h, --help              Bu yardım mesajını göster
+
+      #{renklendir('Örnekler:', :sari)}
+        rails-frontend new blog
+        cd blog
+        rails-frontend run
+        
+        # Yeni sayfa ekle
+        rails-frontend add-page hakkimizda
+        rails-frontend add-page iletisim
+        
+        # Sayfa sil
+        rails-frontend delete-page iletisim
+        
+        # Kısa isim kullanımı
+        rails-f new blog
+        rails-f ap hakkimizda
+        rails-f r
+
+      #{renklendir('Özellikler:', :sari)}
+        ✓ Rails 8+ ile uyumlu
+        ✓ Tailwind CSS otomatik yapılandırma
+        ✓ Stimulus controller desteği
+        ✓ Shared componentler (header, navbar, footer)
+        ✓ Tek controller yapısı (home controller)
+        ✓ Otomatik route yapılandırması
+        ✓ CSS dosyaları otomatik import
+        ✓ Asset klasörleri (images, fonts)
+    HELP
+  end
+
+  def renklendir(metin, renk, bold: false)
+    renkler = {
+      kirmizi: 31,
+      yesil: 32,
+      sari: 33,
+      mavi: 34,
+      magenta: 35,
+      cyan: 36
+    }
+
+    renk_kodu = renkler[renk] || 37
+    bold_kodu = bold ? '1;' : ''
+    
+    "\e[#{bold_kodu}#{renk_kodu}m#{metin}\e[0m"
+  end
+end
+
+# Script olarak çalıştırıldığında
+if __FILE__ == $0
+  cli = RailsFrontendCLI.new
+  cli.calistir(ARGV)
+end
