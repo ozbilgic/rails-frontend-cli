@@ -66,12 +66,18 @@ class RailsFrontendCLI
       hata_mesaji("'#{@proje_adi}' dizini zaten mevcut!")
     end
 
-    # Adım 1: Rails projesi oluştur (sadece frontend için gerekli özelliklerle)
-    adim_goster(1, "Rails projesi oluşturuluyor (frontend odaklı)...")
-    rails_komut = "rails new #{@proje_adi} --css=tailwind --javascript=importmap " \
-                  "--skip-test --skip-system-test --skip-action-mailer " \
-                  "--skip-action-mailbox --skip-action-text --skip-active-job " \
-                  "--skip-action-cable"
+    # Adım 1: Rails projesi oluştur
+    adim_goster(1, "Rails projesi oluşturuluyor...")
+    
+    # Clean mode'a göre komut oluştur
+    if @clean_mode
+      rails_komut = "rails new #{@proje_adi} --css=tailwind --javascript=importmap " \
+                    "--skip-test --skip-system-test --skip-action-mailer " \
+                    "--skip-action-mailbox --skip-action-text --skip-active-job " \
+                    "--skip-action-cable"
+    else
+      rails_komut = "rails new #{@proje_adi} --css=tailwind --javascript=importmap"
+    end
     
     unless system(rails_komut)
       hata_mesaji("Rails projesi oluşturulamadı!")
@@ -171,8 +177,8 @@ class RailsFrontendCLI
     guncelle_routes(sayfa_adi_normalized, sayfa_adi_normalized)
     basari_mesaji("Route eklendi")
 
-    puts "\n✅ #{renklendir('Sayfa başarıyla eklendi!', :yesil)}"
-    puts "📄 Sayfa URL: #{renklendir("/#{sayfa_adi_normalized}", :mavi)}"
+    puts "\n #{renklendir('Sayfa başarıyla eklendi!', :yesil)}"
+    puts "Sayfa URL: #{renklendir("/#{sayfa_adi_normalized}", :mavi)}"
   end
 
   def sayfa_sil
@@ -196,7 +202,7 @@ class RailsFrontendCLI
     end
 
     # Onay al
-    print "#{renklendir('⚠️  Emin misiniz?', :sari)} '#{sayfa_adi_normalized}' sayfası silinecek (y/n): "
+    print "#{renklendir('Emin misiniz?', :sari)} '#{sayfa_adi_normalized}' sayfası silinecek (y/n): "
     onay = STDIN.gets.chomp.downcase
     unless onay == 'y' || onay == 'yes' || onay == 'e' || onay == 'evet'
       puts "İşlem iptal edildi."
@@ -228,7 +234,7 @@ class RailsFrontendCLI
     kaldir_route(sayfa_adi_normalized)
     basari_mesaji("Route kaldırıldı")
 
-    puts "\n✅ #{renklendir('Sayfa başarıyla silindi!', :yesil)}"
+    puts "\n #{renklendir('Sayfa başarıyla silindi!', :yesil)}"
   end
 
   # Helper metodlar
@@ -245,7 +251,7 @@ class RailsFrontendCLI
       hata_mesaji("bin/dev dosyası bulunamadı! Bu proje Rails 8+ ile oluşturulmamış olabilir.")
     end
 
-    puts "\n#{renklendir('🚀 Rails server başlatılıyor...', :yesil, bold: true)}"
+    puts "\n#{renklendir('Rails server başlatılıyor...', :yesil, bold: true)}"
     puts "#{renklendir('Durdurmak için Ctrl+C kullanın', :sari)}\n\n"
     
     exec('bin/dev')
@@ -255,19 +261,33 @@ class RailsFrontendCLI
     controller_path = 'app/controllers/home_controller.rb'
     return unless File.exist?(controller_path)
 
+    # Küçük bir gecikme ekle (ardı ardına işlemler için)
+    sleep(0.1)
+
     controller_content = File.read(controller_path)
     
-    # Action zaten varsa ekleme
-    return if controller_content.include?("def #{sayfa_adi}")
+    # Action zaten varsa ekleme - kelime sınırı ile kontrol et
+    # "def urunle" ve "def urunler" ayrı ayrı algılansın
+    return if controller_content.match?(/^\s*def\s+#{Regexp.escape(sayfa_adi)}\s*$/)
 
-    # Son 'end'den önce yeni action ekle
-    yeni_action = "  def #{sayfa_adi}\n  end\n\n"
+    # Class tanımını bul ve son end'den önce ekle
+    lines = controller_content.split("\n")
     
-    controller_content.gsub!(/^end\s*$/) do |match|
-      "#{yeni_action}#{match}"
+    # Son end satırının index'ini bul
+    last_end_index = lines.rindex { |line| line.strip == 'end' }
+    
+    if last_end_index
+      # Yeni action'ı son end'den önce ekle
+      new_action_lines = [
+        "  def #{sayfa_adi}",
+        "  end",
+        ""
+      ]
+      
+      lines.insert(last_end_index, *new_action_lines)
+      controller_content = lines.join("\n")
+      File.write(controller_path, controller_content)
     end
-
-    File.write(controller_path, controller_content)
   end
 
   def home_controller_action_kaldir(sayfa_adi)
@@ -276,8 +296,12 @@ class RailsFrontendCLI
 
     controller_content = File.read(controller_path)
     
-    # Action'ı kaldır (def ile end arası)
-    controller_content.gsub!(/\s*def #{sayfa_adi}\s*\n\s*end\s*\n/, '')
+    # Action'ı kaldır - daha güvenli regex
+    # "  def sayfa_adi" ile başlayan ve "  end" ile biten bloğu bul
+    controller_content.gsub!(/^\s*def #{Regexp.escape(sayfa_adi)}\s*$.*?^\s*end\s*$/m, '')
+    
+    # Fazla boş satırları temizle (3'ten fazla ardışık boş satır varsa 2'ye düşür)
+    controller_content.gsub!(/\n{3,}/, "\n\n")
 
     File.write(controller_path, controller_content)
   end
@@ -287,8 +311,10 @@ class RailsFrontendCLI
     gereksiz_dosyalar = [
       'app/mailers',
       'app/jobs',
+      'app/models',
       'test',
       'app/channels',
+      '.kamal',
       'config/cable.yml',
       'config/queue.yml',
       'config/recurring.yml',
@@ -298,9 +324,8 @@ class RailsFrontendCLI
     ]
 
     gereksiz_dosyalar.each do |dosya|
-      if File.exist?(dosya)
-        FileUtils.rm_rf(dosya)
-      end
+      # Mevcut olmayan klasör silme işlemi hata üretmesin
+      FileUtils.rm_rf(dosya) if File.exist?(dosya) || Dir.exist?(dosya)
     end
 
     # Gemfile'dan gereksiz gem'leri kaldır (yorum satırı yap)
@@ -378,37 +403,33 @@ class RailsFrontendCLI
     # Header
     header_content = <<~HTML
       <header class="bg-white shadow-sm">
-        <nav class="container mx-auto px-4 py-4">
+        <div class="container mx-auto px-4 py-4">
           <div class="flex items-center justify-between">
             <div class="text-2xl font-bold text-indigo-600">
               Logo
             </div>
-            <div class="hidden md:flex space-x-6">
-              <%= link_to "Ana Sayfa", root_path, class: "text-gray-700 hover:text-indigo-600 transition" %>
-              <!-- Diğer menü öğeleri buraya eklenecek -->
-            </div>
+            <%= render 'shared/navbar' %>
           </div>
-        </nav>
+        </div>
       </header>
     HTML
     File.write('app/views/shared/_header.html.erb', header_content)
 
     # Navbar
     navbar_content = <<~HTML
-      <!-- Navbar içeriği buraya eklenecek -->
+      <nav class="hidden md:flex space-x-6">
+        <%= link_to "Ana Sayfa", root_path, class: "text-gray-700 hover:text-indigo-600 transition" %>
+        <!-- Diğer menü öğeleri buraya eklenecek -->
+      </nav>
     HTML
     File.write('app/views/shared/_navbar.html.erb', navbar_content)
 
-    # Footer
+    # Footer - Basit ve tam genişlikte
     footer_content = <<~HTML
-      <footer class="bg-gray-800 text-white py-8 mt-auto">
-        <div class="container mx-auto px-4">
-          <div class="text-center">
-            <p class="text-gray-400">
-              © <%= Time.current.year %> Tüm hakları saklıdır.
-            </p>
-          </div>
-        </div>
+      <footer class="bg-gray-800 text-white py-6 text-center">
+        <p class="text-gray-400">
+          © <%= Time.current.year %> Tüm hakları saklıdır.
+        </p>
       </footer>
     HTML
     File.write('app/views/shared/_footer.html.erb', footer_content)
@@ -512,20 +533,24 @@ class RailsFrontendCLI
 
     layout_content = File.read(layout_path)
 
+    # Önce mevcut main tag'lerini temizle
+    layout_content.gsub!(/<main[^>]*>/, '')
+    layout_content.gsub!(/<\/main>/, '')
+
     # Body içine shared componentleri ekle
     if layout_content.include?('<body>')
       yeni_layout = layout_content.gsub(/<body>/) do
         <<~HTML.chomp
-          <body class="flex flex-col min-h-screen">
+          <body>
             <%= render 'shared/header' %>
+            <main class="min-h-screen">
         HTML
       end
 
       # Yield'den sonra footer ekle
       yeni_layout = yeni_layout.gsub(/\s*<%= yield %>/) do
         <<~HTML.chomp
-          <main class="flex-grow">
-              <%= yield %>
+          <%= yield %>
             </main>
             <%= render 'shared/footer' %>
         HTML
@@ -660,25 +685,26 @@ class RailsFrontendCLI
   end
 
   def adim_goster(numara, mesaj)
-    puts "\n#{renklendir("Adım #{numara}:", :sari)} #{mesaj}"
+    # Sadece mesajı göster, numara gösterme
+    print "  #{mesaj} "
   end
 
   def basari_mesaji(mesaj)
-    puts "  #{renklendir('✓', :yesil)} #{mesaj}"
+    puts renklendir('OK', :yesil)
   end
 
   def hata_mesaji(mesaj)
-    puts "\n#{renklendir('✗ HATA:', :kirmizi)} #{mesaj}\n"
+    puts "\n#{renklendir('HATA:', :kirmizi)} #{mesaj}\n"
     exit 1
   end
 
   def tamamlandi_mesaji
     puts "\n" + "=" * 60
-    puts renklendir("🎉 Proje başarıyla oluşturuldu!", :yesil, bold: true)
+    puts renklendir("Proje başarıyla oluşturuldu!", :yesil, bold: true)
     puts "=" * 60
     puts "\n#{renklendir('Sonraki adımlar:', :mavi)}"
     puts "  1. cd #{@proje_adi}"
-    puts "  2. rails-frontend run  (veya: bin/dev)"
+    puts "  2. rails-frontend run"
     puts "  3. Tarayıcıda http://localhost:3000 adresini açın"
     puts "\n#{renklendir('Yeni sayfa eklemek için:', :mavi)}"
     puts "  rails-frontend add-page SAYFA_ADI"
@@ -693,7 +719,6 @@ class RailsFrontendCLI
       
       #{renklendir('Kullanım:', :sari)}
         rails-frontend KOMUT [ARGÜMANLAR] [SEÇENEKLER]
-        rails-f KOMUT [ARGÜMANLAR] [SEÇENEKLER]  (kısa isim)
 
       #{renklendir('Komutlar:', :sari)}
         new, n PROJE_ADI [--clean]    Yeni Rails frontend projesi oluştur
@@ -723,22 +748,17 @@ class RailsFrontendCLI
         
         # Sayfa sil
         rails-frontend delete-page iletisim
-        
-        # Kısa isim kullanımı
-        rails-f new blog --clean
-        rails-f ap hakkimizda
-        rails-f r
 
       #{renklendir('Özellikler:', :sari)}
-        ✓ Rails 7+ ile uyumlu
-        ✓ Frontend odaklı yapılandırma (--clean ile)
-        ✓ Tailwind CSS otomatik yapılandırma
-        ✓ Stimulus controller desteği
-        ✓ Shared componentler (header, navbar, footer)
-        ✓ Tek controller yapısı (home controller)
-        ✓ Otomatik route yapılandırması
-        ✓ CSS dosyaları otomatik import
-        ✓ Asset klasörleri (images, fonts)
+        - Rails 7+ ile uyumlu
+        - Frontend odaklı yapılandırma (--clean ile)
+        - Tailwind CSS otomatik yapılandırma
+        - Stimulus controller desteği
+        - Shared componentler (header, navbar, footer)
+        - Tek controller yapısı (home controller)
+        - Otomatik route yapılandırması
+        - CSS dosyaları otomatik import
+        - Asset klasörleri (images, fonts)
     HELP
   end
 

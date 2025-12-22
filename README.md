@@ -64,14 +64,14 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 
 ## Komutlar
 
-| Komut | Kısa İsim | Açıklama |
-|-------|-----------|----------|
-| `rails-frontend new PROJE [--clean]` | `rails-f n PROJE [--clean]` | Yeni proje oluştur |
-| `rails-frontend add-page SAYFA` | `rails-f ap SAYFA` | Sayfa ekle |
-| `rails-frontend delete-page SAYFA` | `rails-f dp SAYFA` | Sayfa sil |
-| `rails-frontend run` | `rails-f r` | Server başlat (bin/dev) |
-| `rails-frontend version` | `rails-f -v` | Versiyon göster |
-| `rails-frontend help` | `rails-f -h` | Yardım göster |
+| Komut | Açıklama |
+|-------|----------|
+| `rails-frontend new PROJE [--clean]` | Yeni proje oluştur |
+| `rails-frontend add-page SAYFA` | Sayfa ekle |
+| `rails-frontend delete-page SAYFA` | Sayfa sil |
+| `rails-frontend run` | Server başlat (bin/dev) |
+| `rails-frontend version` | Versiyon göster |
+| `rails-frontend help` | Yardım göster |
 
 **Seçenekler:**
 - `--clean`: Frontend için gereksiz dosyaları temizle (önerilen)

@@ -18,7 +18,7 @@ source ~/.bashrc  # veya source ~/.zshrc
 ```bash
 git clone https://github.com/ozbilgic/rails_frontend_cli.git
 cd rails_frontend_cli
-chmod +x rails-frontend rails-f rails_frontend_setup.rb
+chmod +x rails-frontendrontend rails-frontend rails_frontend_setup.rb
 
 # PATH'e ekleyin (~/.bashrc veya ~/.zshrc)
 export PATH="$PATH:$(pwd)"
@@ -28,9 +28,9 @@ source ~/.bashrc
 ### Kurulumu Test Et
 
 ```bash
-rails-frontend --version
+rails-frontendrontend --version
 # veya
-rails-f --version
+rails-frontend version
 ```
 
 ## 🚀 Kullanım
@@ -38,22 +38,22 @@ rails-f --version
 ### Yeni Proje Oluşturma
 
 ```bash
-rails-frontend new PROJE_ADI
+rails-frontendrontend new PROJE_ADI
 # veya kısa isim ile
-rails-f new PROJE_ADI
+rails-frontend new PROJE_ADI
 ```
 
 **Örnek:**
 ```bash
 # Standart proje
-rails-frontend new blog
+rails-frontendrontend new blog
 cd blog
-rails-frontend run
+rails-frontendrontend run
 
 # Temiz frontend projesi (önerilen)
-rails-frontend new blog --clean
+rails-frontendrontend new blog --clean
 cd blog
-rails-frontend run
+rails-frontendrontend run
 ```
 
 Tarayıcıda `http://localhost:3000` adresini açın.
@@ -95,17 +95,17 @@ Tarayıcıda `http://localhost:3000` adresini açın.
 Mevcut Rails projesinin içindeyken:
 
 ```bash
-rails-frontend add-page SAYFA_ADI
+rails-frontendrontend add-page SAYFA_ADI
 # veya
-rails-f ap SAYFA_ADI
+rails-frontend ap SAYFA_ADI
 ```
 
 **Örnekler:**
 ```bash
 cd blog
-rails-frontend add-page hakkimizda
-rails-frontend add-page iletisim
-rails-frontend add-page urunler
+rails-frontendrontend add-page hakkimizda
+rails-frontendrontend add-page iletisim
+rails-frontendrontend add-page urunler
 ```
 
 Her sayfa için otomatik olarak oluşturulur:
@@ -118,9 +118,9 @@ Her sayfa için otomatik olarak oluşturulur:
 ### Server Başlatma
 
 ```bash
-rails-frontend run
+rails-frontendrontend run
 # veya
-rails-f r
+rails-frontend r
 ```
 
 Bu komut `bin/dev` dosyasını çalıştırarak Rails server'ı başlatır.
@@ -128,14 +128,14 @@ Bu komut `bin/dev` dosyasını çalıştırarak Rails server'ı başlatır.
 ### Sayfa Silme
 
 ```bash
-rails-frontend delete-page SAYFA_ADI
+rails-frontendrontend delete-page SAYFA_ADI
 # veya
-rails-f dp SAYFA_ADI
+rails-frontend dp SAYFA_ADI
 ```
 
 **Örnek:**
 ```bash
-rails-frontend delete-page iletisim
+rails-frontendrontend delete-page iletisim
 ```
 
 ⚠️ **Not:** Ana sayfa (home/index) silinemez.
@@ -324,12 +324,12 @@ end
 
 | Komut | Kısa İsim | Açıklama |
 |-------|-----------|----------|
-| `rails-frontend new PROJE [--clean]` | `rails-f n PROJE [--clean]` | Yeni proje oluştur |
-| `rails-frontend add-page SAYFA` | `rails-f ap SAYFA` | Sayfa ekle |
-| `rails-frontend delete-page SAYFA` | `rails-f dp SAYFA` | Sayfa sil |
-| `rails-frontend run` | `rails-f r` | Server başlat (bin/dev) |
-| `rails-frontend version` | `rails-f -v` | Versiyon göster |
-| `rails-frontend help` | `rails-f -h` | Yardım göster |
+| `rails-frontendrontend new PROJE [--clean]` | `rails-frontend n PROJE [--clean]` | Yeni proje oluştur |
+| `rails-frontendrontend add-page SAYFA` | `rails-frontend ap SAYFA` | Sayfa ekle |
+| `rails-frontendrontend delete-page SAYFA` | `rails-frontend dp SAYFA` | Sayfa sil |
+| `rails-frontendrontend run` | `rails-frontend r` | Server başlat (bin/dev) |
+| `rails-frontendrontend version` | `rails-frontend -v` | Versiyon göster |
+| `rails-frontendrontend help` | `rails-frontend -h` | Yardım göster |
 
 **Seçenekler:**
 - `--clean`: Frontend için gereksiz dosyaları temizle (önerilen)
@@ -338,7 +338,7 @@ end
 
 ### 1. Komut bulunamadı hatası
 
-**Sorun:** `rails-frontend: command not found`
+**Sorun:** `rails-frontendrontend: command not found`
 
 **Çözüm:**
 ```bash
@@ -432,16 +432,16 @@ Kullanımı:
 
 ```bash
 # 1. Yeni proje oluştur
-rails-frontend new blog
+rails-frontendrontend new blog
 cd blog
 
 # 2. Server'ı başlat
-rails-frontend run
+rails-frontendrontend run
 
 # 3. Yeni terminal açıp sayfalar ekle
-rails-frontend add-page hakkimizda
-rails-frontend add-page yazilar
-rails-frontend add-page iletisim
+rails-frontendrontend add-page hakkimizda
+rails-frontendrontend add-page yazilar
+rails-frontendrontend add-page iletisim
 
 # 4. Shared componentleri özelleştir
 # app/views/shared/_header.html.erb dosyasını düzenle
@@ -453,16 +453,16 @@ rails-frontend add-page iletisim
 
 ```bash
 # 1. Temiz proje oluştur
-rails-frontend new portfolio --clean
+rails-frontendrontend new portfolio --clean
 cd portfolio
 
 # 2. Server'ı başlat
-rails-frontend run
+rails-frontendrontend run
 
 # 3. Sayfalar ekle
-rails-f ap projeler
-rails-f ap yetenekler
-rails-f ap iletisim
+rails-frontend ap projeler
+rails-frontend ap yetenekler
+rails-frontend ap iletisim
 
 # 4. Geliştirmeye başla!
 # Gereksiz dosyalar olmadan temiz bir yapı
@@ -479,7 +479,7 @@ rails-f ap iletisim
 
 Sorun yaşarsanız:
 
-1. `rails-frontend help` komutunu çalıştırın
+1. `rails-frontendrontend help` komutunu çalıştırın
 2. Rails log dosyalarını kontrol edin: `log/development.log`
 3. Browser console'u kontrol edin (F12)
 
