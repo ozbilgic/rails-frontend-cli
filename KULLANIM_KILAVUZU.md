@@ -2,13 +2,13 @@
 
 Frontend geliştiriciler için hazırlanmış, Rails projesi oluşturma ve yönetme aracı.
 
-## 📦 Kurulum
+## Kurulum
 
 ### Otomatik Kurulum (Önerilen)
 
 ```bash
-git clone https://github.com/ozbilgic/rails_frontend_cli.git
-cd rails_frontend_cli
+git clone https://github.com/ozbilgic/rails-frontend-cli.git
+cd rails-frontend-cli
 ./install.sh
 source ~/.bashrc  # veya source ~/.zshrc
 ```
@@ -16,9 +16,9 @@ source ~/.bashrc  # veya source ~/.zshrc
 ### Manuel Kurulum
 
 ```bash
-git clone https://github.com/ozbilgic/rails_frontend_cli.git
-cd rails_frontend_cli
-chmod +x rails-frontendrontend rails-frontend rails_frontend_setup.rb
+git clone https://github.com/ozbilgic/rails-frontend-cli.git
+cd rails-frontend-cli
+chmod +x rails-frontend rails-frontend rails_frontend_setup.rb
 
 # PATH'e ekleyin (~/.bashrc veya ~/.zshrc)
 export PATH="$PATH:$(pwd)"
@@ -28,32 +28,26 @@ source ~/.bashrc
 ### Kurulumu Test Et
 
 ```bash
-rails-frontendrontend --version
+rails-frontend --version
 # veya
 rails-frontend version
 ```
 
-## 🚀 Kullanım
+## Kullanım
 
 ### Yeni Proje Oluşturma
 
 ```bash
-rails-frontendrontend new PROJE_ADI
-# veya kısa isim ile
-rails-frontend new PROJE_ADI
-```
-
-**Örnek:**
-```bash
-# Standart proje
-rails-frontendrontend new blog
-cd blog
-rails-frontendrontend run
-
 # Temiz frontend projesi (önerilen)
-rails-frontendrontend new blog --clean
+# Frontend için gerekli olmayan dosyalar oluşturulmaz (--skip-test vs..)
+rails-frontend new blog --clean
 cd blog
-rails-frontendrontend run
+rails-frontend run
+
+# Standart proje
+rails-frontend new blog
+cd blog
+rails-frontend run
 ```
 
 Tarayıcıda `http://localhost:3000` adresini açın.
@@ -73,39 +67,28 @@ Tarayıcıda `http://localhost:3000` adresini açın.
 **Silinen Dosya ve Klasörler:**
 - `app/mailers/`
 - `app/jobs/`
+- `app/models`
 - `test/`
 - `app/channels/`
 - `config/cable.yml`, `config/queue.yml`, `config/recurring.yml`
 - `db/queue_schema.rb`, `db/cable_schema.rb`
 - `bin/jobs`
-
-**Avantajları:**
-✅ Daha temiz proje yapısı
-✅ Daha az dosya ve klasör
-✅ Frontend odaklı geliştirme
-✅ Daha hızlı kurulum
-
-**Ne Zaman Kullanılmalı:**
-- Sadece frontend geliştirme yapıyorsanız
-- API backend ayrı bir projede ise
-- E-posta gönderme, background job gibi özellikler gerekmiyorsa
+- `.kamal`
 
 ### Yeni Sayfa Ekleme
 
 Mevcut Rails projesinin içindeyken:
 
 ```bash
-rails-frontendrontend add-page SAYFA_ADI
-# veya
-rails-frontend ap SAYFA_ADI
+rails-frontend add-page SAYFA_ADI
 ```
 
 **Örnekler:**
 ```bash
 cd blog
-rails-frontendrontend add-page hakkimizda
-rails-frontendrontend add-page iletisim
-rails-frontendrontend add-page urunler
+rails-frontend add-page hakkimizda
+rails-frontend add-page iletisim
+rails-frontend add-page urunler
 ```
 
 Her sayfa için otomatik olarak oluşturulur:
@@ -118,9 +101,7 @@ Her sayfa için otomatik olarak oluşturulur:
 ### Server Başlatma
 
 ```bash
-rails-frontendrontend run
-# veya
-rails-frontend r
+rails-frontend run
 ```
 
 Bu komut `bin/dev` dosyasını çalıştırarak Rails server'ı başlatır.
@@ -128,19 +109,17 @@ Bu komut `bin/dev` dosyasını çalıştırarak Rails server'ı başlatır.
 ### Sayfa Silme
 
 ```bash
-rails-frontendrontend delete-page SAYFA_ADI
-# veya
-rails-frontend dp SAYFA_ADI
+rails-frontend delete-page SAYFA_ADI
 ```
 
 **Örnek:**
 ```bash
-rails-frontendrontend delete-page iletisim
+rails-frontend delete-page iletisim
 ```
 
-⚠️ **Not:** Ana sayfa (home/index) silinemez.
+**Not:** Ana sayfa (home/index) silinemez.
 
-## 📁 Proje Yapısı
+## Proje Yapısı
 
 Yeni oluşturulan projeler şu yapıya sahiptir:
 
@@ -176,7 +155,7 @@ proje_adi/
     └── routes.rb (root ayarlanmış)
 ```
 
-## 🎨 Tailwind CSS Kullanımı
+## Tailwind CSS Kullanımı
 
 Projeler Tailwind CSS ile gelir. Doğrudan Tailwind sınıflarını kullanabilirsiniz:
 
@@ -200,7 +179,7 @@ Her sayfa için otomatik oluşturulan CSS dosyasını kullanabilirsiniz:
 
 CSS dosyaları otomatik olarak `application.tailwind.css` dosyasına import edilir.
 
-## ⚡ Stimulus Controller Kullanımı
+## Stimulus Controller Kullanımı
 
 Her sayfa için otomatik olarak bir Stimulus controller oluşturulur.
 
@@ -259,7 +238,7 @@ export default class extends Controller {
 }
 ```
 
-## 🧩 Shared Componentler
+## Shared Componentler
 
 Layout dosyası otomatik olarak shared componentleri içerir:
 
@@ -297,7 +276,7 @@ Layout dosyası otomatik olarak shared componentleri içerir:
 </header>
 ```
 
-## 🛣️ Routes
+## Routes
 
 Routes otomatik olarak yapılandırılır:
 
@@ -312,7 +291,7 @@ end
 
 **Not:** Tüm sayfalar home controller kullanır.
 
-### Named Routes Kullanımı
+### Routes Kullanımı
 
 ```erb
 <%= link_to "Ana Sayfa", root_path %>
@@ -320,33 +299,30 @@ end
 <%= link_to "İletişim", iletisim_path %>
 ```
 
-## 📝 Komut Referansı
+## Komut Referansı
 
 | Komut | Kısa İsim | Açıklama |
 |-------|-----------|----------|
-| `rails-frontendrontend new PROJE [--clean]` | `rails-frontend n PROJE [--clean]` | Yeni proje oluştur |
-| `rails-frontendrontend add-page SAYFA` | `rails-frontend ap SAYFA` | Sayfa ekle |
-| `rails-frontendrontend delete-page SAYFA` | `rails-frontend dp SAYFA` | Sayfa sil |
-| `rails-frontendrontend run` | `rails-frontend r` | Server başlat (bin/dev) |
-| `rails-frontendrontend version` | `rails-frontend -v` | Versiyon göster |
-| `rails-frontendrontend help` | `rails-frontend -h` | Yardım göster |
+| `rails-frontend new PROJE [--clean]` | Yeni proje oluştur |
+| `rails-frontend add-page SAYFA` | Sayfa ekle |
+| `rails-frontend delete-page SAYFA` | Sayfa sil |
+| `rails-frontend run` | Server başlat (bin/dev) |
+| `rails-frontend version` | Versiyon göster |
+| `rails-frontend help` | Yardım göster |
 
-**Seçenekler:**
-- `--clean`: Frontend için gereksiz dosyaları temizle (önerilen)
-
-## 🔧 Sık Karşılaşılan Sorunlar
+## Sık Karşılaşılan Sorunlar
 
 ### 1. Komut bulunamadı hatası
 
-**Sorun:** `rails-frontendrontend: command not found`
+**Sorun:** `rails-frontend: command not found`
 
 **Çözüm:**
 ```bash
 # PATH'e eklendiğinden emin olun
-echo $PATH | grep rails_frontend_cli
+echo $PATH | grep rails-frontend-cli
 
 # Yoksa ~/.bashrc veya ~/.zshrc'ye ekleyin
-export PATH="$PATH:/home/levent/rails_frontend_cli"
+export PATH="$PATH:$(pwd)"
 source ~/.bashrc
 ```
 
@@ -356,11 +332,8 @@ source ~/.bashrc
 
 **Çözüm:**
 ```bash
-# Tailwind'i yeniden derleyin
+# Tailwind'i yeniden derleyin (Proje klasöründeyken)
 bin/rails tailwindcss:build
-
-# Geliştirme modunda otomatik derleme için
-bin/rails tailwindcss:watch
 ```
 
 ### 3. Stimulus controller çalışmıyor
@@ -369,11 +342,8 @@ bin/rails tailwindcss:watch
 
 **Çözüm:**
 ```bash
-# JavaScript'leri yeniden derleyin
+# JavaScript'leri yeniden derleyin (Proje klasöründeyken)
 bin/rails assets:precompile
-
-# Geliştirme modunda server'ı yeniden başlatın
-bin/rails server
 ```
 
 ### 4. Türkçe karakter sorunları
@@ -385,19 +355,9 @@ bin/rails server
 - `ürünler` → `urunler`
 - `iletişim` → `iletisim`
 
-## 💡 İpuçları
+## İpuçları
 
-### 1. Hızlı Geliştirme
-
-```bash
-# Terminal 1: Rails server
-bin/rails server
-
-# Terminal 2: Tailwind watch (otomatik derleme)
-bin/rails tailwindcss:watch
-```
-
-### 2. Sayfa Şablonu Oluşturma
+### 1. Sayfa Şablonu Oluşturma
 
 Sık kullanılan sayfa yapıları için kendi şablonlarınızı oluşturun:
 
@@ -409,7 +369,7 @@ Sık kullanılan sayfa yapıları için kendi şablonlarınızı oluşturun:
 </div>
 ```
 
-### 3. Component Kütüphanesi
+### 2. Component Kütüphanesi
 
 Tekrar kullanılabilir componentler oluşturun:
 
@@ -426,22 +386,40 @@ Kullanımı:
 <%= render 'shared/card', title: 'Başlık', content: 'İçerik' %>
 ```
 
-## 🎯 Örnek Proje Akışı
+## Örnek Proje Akışı
+
+### Temiz Frontend Projesi (Önerilen)
+
+```bash
+# 1. Temiz proje oluştur
+rails-frontend new portfolio --clean
+cd portfolio
+
+# 2. Server'ı başlat
+rails-frontend run
+
+# 3. Sayfalar ekle
+rails-frontend add-page projeler
+rails-frontend add-page yetenekler
+rails-frontend add-page iletisim
+
+# 4. Geliştirmeye başla!
+```
 
 ### Standart Proje
 
 ```bash
 # 1. Yeni proje oluştur
-rails-frontendrontend new blog
+rails-frontend new blog
 cd blog
 
 # 2. Server'ı başlat
-rails-frontendrontend run
+rails-frontend run
 
 # 3. Yeni terminal açıp sayfalar ekle
-rails-frontendrontend add-page hakkimizda
-rails-frontendrontend add-page yazilar
-rails-frontendrontend add-page iletisim
+rails-frontend add-page hakkimizda
+rails-frontend add-page yazilar
+rails-frontend add-page iletisim
 
 # 4. Shared componentleri özelleştir
 # app/views/shared/_header.html.erb dosyasını düzenle
@@ -449,41 +427,20 @@ rails-frontendrontend add-page iletisim
 # 5. Geliştirmeye başla!
 ```
 
-### Temiz Frontend Projesi (Önerilen)
+## Ek Kaynaklar
 
-```bash
-# 1. Temiz proje oluştur
-rails-frontendrontend new portfolio --clean
-cd portfolio
-
-# 2. Server'ı başlat
-rails-frontendrontend run
-
-# 3. Sayfalar ekle
-rails-frontend ap projeler
-rails-frontend ap yetenekler
-rails-frontend ap iletisim
-
-# 4. Geliştirmeye başla!
-# Gereksiz dosyalar olmadan temiz bir yapı
-```
-
-## 📚 Ek Kaynaklar
-
-- **Rails Guides:** https://guides.rubyonrails.org/
 - **Tailwind CSS:** https://tailwindcss.com/docs
 - **Stimulus:** https://stimulus.hotwired.dev/
-- **Hotwire:** https://hotwired.dev/
 
-## 🆘 Destek
+## Destek
 
 Sorun yaşarsanız:
 
-1. `rails-frontendrontend help` komutunu çalıştırın
+1. `rails-frontend help` komutunu çalıştırın
 2. Rails log dosyalarını kontrol edin: `log/development.log`
 3. Browser console'u kontrol edin (F12)
 
-## 📄 Lisans
+## Lisans
 
 Bu araç MIT lisansı altında sunulmaktadır.
 

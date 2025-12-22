@@ -11,7 +11,7 @@ Frontend geliştiriciler için hazırlanmış Rails projesi oluşturma ve yönet
 ✅ Otomatik route yapılandırması  
 ✅ CSS dosyaları otomatik import  
 ✅ Asset klasörleri (images, fonts)  
-✅ Türkçe çıktılar ve dokümantasyon  
+✅ Türkçe dokümantasyon  
 
 ## Hızlı Başlangıç
 
@@ -20,8 +20,8 @@ Frontend geliştiriciler için hazırlanmış Rails projesi oluşturma ve yönet
 **Otomatik Kurulum (Önerilen):**
 
 ```bash
-git clone https://github.com/KULLANICI_ADI/rails_frontend_cli.git
-cd rails_frontend_cli
+git clone https://github.com/ozbilgic/rails-frontend-cli.git
+cd rails-frontend-cli
 ./install.sh
 source ~/.bashrc  # veya source ~/.zshrc
 ```
@@ -29,8 +29,8 @@ source ~/.bashrc  # veya source ~/.zshrc
 **Manuel Kurulum:**
 
 ```bash
-git clone https://github.com/KULLANICI_ADI/rails_frontend_cli.git
-cd rails_frontend_cli
+git clone https://github.com/ozbilgic/rails-frontend-cli.git
+cd rails-frontend-cli
 chmod +x rails-frontend rails-f rails_frontend_setup.rb
 
 # PATH'e ekleyin (~/.bashrc veya ~/.zshrc)
@@ -47,6 +47,7 @@ cd blog
 bin/rails server
 
 # Yeni proje oluştur (temiz frontend - önerilen)
+# Frontend için gerekli olmayan dosyalar oluşturulmaz (--skip-test vs..)
 rails-frontend new blog --clean
 cd blog
 rails-frontend run
@@ -83,7 +84,7 @@ Detaylı kullanım kılavuzu için [KULLANIM_KILAVUZU.md](KULLANIM_KILAVUZU.md) 
 ## Gereksinimler
 
 - Ruby 3.0+
-- Rails 8.0+
+- Rails 7+
 - Node.js (Tailwind CSS için)
 
 ## Lisans
