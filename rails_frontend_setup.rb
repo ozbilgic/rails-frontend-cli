@@ -11,6 +11,7 @@ class RailsFrontendCLI
     @proje_adi = nil
     @sayfa_adi = nil
     @komut = nil
+    @clean_mode = false
   end
 
   def calistir(args)
@@ -25,8 +26,10 @@ class RailsFrontendCLI
     when 'new', 'n'
       @proje_adi = args[1]
       if @proje_adi.nil? || @proje_adi.empty?
-        hata_mesaji("Proje adı belirtilmedi. Kullanım: rails-frontend new PROJE_ADI")
+        hata_mesaji("Proje adı belirtilmedi. Kullanım: rails-frontend new PROJE_ADI [--clean]")
       end
+      # --clean parametresini kontrol et
+      @clean_mode = args.include?('--clean')
       yeni_proje_olustur
     when 'add-page', 'ap'
       @sayfa_adi = args[1]
@@ -63,9 +66,14 @@ class RailsFrontendCLI
       hata_mesaji("'#{@proje_adi}' dizini zaten mevcut!")
     end
 
-    # Adım 1: Rails projesi oluştur
-    adim_goster(1, "Rails 8+ projesi oluşturuluyor...")
-    unless system("rails new #{@proje_adi} --css=tailwind --javascript=importmap")
+    # Adım 1: Rails projesi oluştur (sadece frontend için gerekli özelliklerle)
+    adim_goster(1, "Rails projesi oluşturuluyor (frontend odaklı)...")
+    rails_komut = "rails new #{@proje_adi} --css=tailwind --javascript=importmap " \
+                  "--skip-test --skip-system-test --skip-action-mailer " \
+                  "--skip-action-mailbox --skip-action-text --skip-active-job " \
+                  "--skip-action-cable"
+    
+    unless system(rails_komut)
       hata_mesaji("Rails projesi oluşturulamadı!")
     end
     basari_mesaji("Rails projesi oluşturuldu")
@@ -73,43 +81,53 @@ class RailsFrontendCLI
     # Proje dizinine geç
     proje_dizini = File.expand_path(@proje_adi)
     Dir.chdir(proje_dizini) do
-      # Adım 2: Home controller ve view oluştur
-      adim_goster(2, "Home controller ve view oluşturuluyor...")
+      # Adım 2: Gereksiz dosyaları temizle (eğer --clean parametresi varsa)
+      if @clean_mode
+        adim_goster(2, "Gereksiz dosyalar temizleniyor...")
+        temizle_gereksiz_dosyalar
+        basari_mesaji("Gereksiz dosyalar temizlendi")
+        adim_offset = 1
+      else
+        adim_offset = 0
+      end
+
+      # Adım 3 (veya 2): Home controller ve view oluştur
+      adim_goster(2 + adim_offset, "Home controller ve view oluşturuluyor...")
       olustur_home_controller
       basari_mesaji("Home controller ve view oluşturuldu")
 
-      # Adım 3: Shared componentler oluştur
-      adim_goster(3, "Shared componentler oluşturuluyor...")
+      # Adım 4 (veya 3): Shared componentler oluştur
+      adim_goster(3 + adim_offset, "Shared componentler oluşturuluyor...")
       olustur_shared_componentler
       basari_mesaji("Shared componentler oluşturuldu")
 
-      # Adım 4: CSS dosyaları oluştur
-      adim_goster(4, "CSS dosyaları oluşturuluyor...")
+      # Adım 5 (veya 4): CSS dosyaları oluştur
+      adim_goster(4 + adim_offset, "CSS dosyaları oluşturuluyor...")
       olustur_css_dosyalari
       basari_mesaji("CSS dosyaları oluşturuldu")
 
-      # Adım 5: Stimulus controller oluştur
-      adim_goster(5, "Stimulus controller oluşturuluyor...")
+      # Adım 6 (veya 5): Stimulus controller oluştur
+      adim_goster(5 + adim_offset, "Stimulus controller oluşturuluyor...")
       olustur_stimulus_controller('home')
       basari_mesaji("Stimulus controller oluşturuldu")
 
-      # Adım 6: Asset klasörleri oluştur
-      adim_goster(6, "Asset klasörleri oluşturuluyor...")
+      # Adım 7 (veya 6): Asset klasörleri oluştur
+      adim_goster(6 + adim_offset, "Asset klasörleri oluşturuluyor...")
       olustur_asset_klasorleri
       basari_mesaji("Asset klasörleri oluşturuldu")
 
-      # Adım 7: Layout dosyasını güncelle
-      adim_goster(7, "Layout dosyası güncelleniyor...")
+      # Adım 8 (veya 7): Layout dosyasını güncelle
+      adim_goster(7 + adim_offset, "Layout dosyası güncelleniyor...")
       guncelle_layout
       basari_mesaji("Layout dosyası güncellendi")
 
-      # Adım 8: Routes yapılandır
-      adim_goster(8, "Routes yapılandırılıyor...")
+      # Adım 9 (veya 8): Routes yapılandır
+      adim_goster(8 + adim_offset, "Routes yapılandırılıyor...")
       guncelle_routes('home', 'index', root: true)
       basari_mesaji("Routes yapılandırıldı")
 
-      # Adım 9: Tailwind yapılandırmasını güncelle
-      adim_goster(9, "Tailwind yapılandırması güncelleniyor...")
+      # Adım 10 (veya 9): Tailwind yapılandırmasını güncelle
+      adim_goster(9 + adim_offset, "Tailwind yapılandırması güncelleniyor...")
       guncelle_tailwind_config
       basari_mesaji("Tailwind yapılandırması güncellendi")
     end
@@ -262,6 +280,39 @@ class RailsFrontendCLI
     controller_content.gsub!(/\s*def #{sayfa_adi}\s*\n\s*end\s*\n/, '')
 
     File.write(controller_path, controller_content)
+  end
+
+  def temizle_gereksiz_dosyalar
+    # Frontend için gereksiz dosya ve klasörleri sil
+    gereksiz_dosyalar = [
+      'app/mailers',
+      'app/jobs',
+      'test',
+      'app/channels',
+      'config/cable.yml',
+      'config/queue.yml',
+      'config/recurring.yml',
+      'db/queue_schema.rb',
+      'db/cable_schema.rb',
+      'bin/jobs'
+    ]
+
+    gereksiz_dosyalar.each do |dosya|
+      if File.exist?(dosya)
+        FileUtils.rm_rf(dosya)
+      end
+    end
+
+    # Gemfile'dan gereksiz gem'leri kaldır (yorum satırı yap)
+    if File.exist?('Gemfile')
+      gemfile = File.read('Gemfile')
+      
+      # Solid queue, cable, cache satırlarını yorum yap
+      gemfile.gsub!(/^(gem ['"]solid_queue['"])/, '# \1  # Frontend için gerekli değil')
+      gemfile.gsub!(/^(gem ['"]solid_cable['"])/, '# \1  # Frontend için gerekli değil')
+      
+      File.write('Gemfile', gemfile)
+    end
   end
 
   def normalize_isim(isim)
@@ -641,19 +692,28 @@ class RailsFrontendCLI
       #{renklendir('Rails Frontend CLI', :mavi, bold: true)} - v#{VERSION}
       
       #{renklendir('Kullanım:', :sari)}
-        rails-frontend KOMUT [ARGÜMANLAR]
-        rails-f KOMUT [ARGÜMANLAR]  (kısa isim)
+        rails-frontend KOMUT [ARGÜMANLAR] [SEÇENEKLER]
+        rails-f KOMUT [ARGÜMANLAR] [SEÇENEKLER]  (kısa isim)
 
       #{renklendir('Komutlar:', :sari)}
-        new, n PROJE_ADI              Yeni Rails frontend projesi oluştur
+        new, n PROJE_ADI [--clean]    Yeni Rails frontend projesi oluştur
         add-page, ap SAYFA_ADI        Mevcut projeye yeni sayfa ekle
         delete-page, dp SAYFA_ADI     Mevcut projeden sayfa sil
         run, r                        Rails server'ı başlat (bin/dev)
         version, -v, --version        Versiyon bilgisini göster
         help, -h, --help              Bu yardım mesajını göster
 
+      #{renklendir('Seçenekler:', :sari)}
+        --clean                       Frontend için gereksiz dosyaları temizle
+                                      (test, mailers, jobs, channels, vb.)
+
       #{renklendir('Örnekler:', :sari)}
+        # Standart proje
         rails-frontend new blog
+        
+        # Temiz frontend projesi (önerilen)
+        rails-frontend new blog --clean
+        
         cd blog
         rails-frontend run
         
@@ -665,12 +725,13 @@ class RailsFrontendCLI
         rails-frontend delete-page iletisim
         
         # Kısa isim kullanımı
-        rails-f new blog
+        rails-f new blog --clean
         rails-f ap hakkimizda
         rails-f r
 
       #{renklendir('Özellikler:', :sari)}
-        ✓ Rails 8+ ile uyumlu
+        ✓ Rails 7+ ile uyumlu
+        ✓ Frontend odaklı yapılandırma (--clean ile)
         ✓ Tailwind CSS otomatik yapılandırma
         ✓ Stimulus controller desteği
         ✓ Shared componentler (header, navbar, footer)

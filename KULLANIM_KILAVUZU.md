@@ -4,22 +4,28 @@ Frontend geliştiriciler için hazırlanmış, Rails projesi oluşturma ve yöne
 
 ## 📦 Kurulum
 
-### Adım 1: PATH'e Ekle
-
-Aracı sistem genelinde kullanabilmek için PATH'inize ekleyin:
+### Otomatik Kurulum (Önerilen)
 
 ```bash
-# ~/.bashrc veya ~/.zshrc dosyanıza ekleyin
-export PATH="$PATH:/path_to/rails_frontend_cli"
-```
-
-Ardından terminal'i yeniden başlatın veya:
-
-```bash
+git clone https://github.com/ozbilgic/rails_frontend_cli.git
+cd rails_frontend_cli
+./install.sh
 source ~/.bashrc  # veya source ~/.zshrc
 ```
 
-### Adım 2: Kurulumu Test Et
+### Manuel Kurulum
+
+```bash
+git clone https://github.com/ozbilgic/rails_frontend_cli.git
+cd rails_frontend_cli
+chmod +x rails-frontend rails-f rails_frontend_setup.rb
+
+# PATH'e ekleyin (~/.bashrc veya ~/.zshrc)
+export PATH="$PATH:$(pwd)"
+source ~/.bashrc
+```
+
+### Kurulumu Test Et
 
 ```bash
 rails-frontend --version
@@ -39,12 +45,50 @@ rails-f new PROJE_ADI
 
 **Örnek:**
 ```bash
+# Standart proje
 rails-frontend new blog
+cd blog
+rails-frontend run
+
+# Temiz frontend projesi (önerilen)
+rails-frontend new blog --clean
 cd blog
 rails-frontend run
 ```
 
 Tarayıcıda `http://localhost:3000` adresini açın.
+
+### `--clean` Parametresi
+
+`--clean` parametresi ile proje oluşturulduğunda, frontend geliştirme için gereksiz Rails özellikleri kaldırılır:
+
+**Atlanılan Özellikler:**
+- Test dosyaları (`--skip-test`, `--skip-system-test`)
+- Action Mailer (`--skip-action-mailer`)
+- Action Mailbox (`--skip-action-mailbox`)
+- Action Text (`--skip-action-text`)
+- Active Job (`--skip-active-job`)
+- Action Cable (`--skip-action-cable`)
+
+**Silinen Dosya ve Klasörler:**
+- `app/mailers/`
+- `app/jobs/`
+- `test/`
+- `app/channels/`
+- `config/cable.yml`, `config/queue.yml`, `config/recurring.yml`
+- `db/queue_schema.rb`, `db/cable_schema.rb`
+- `bin/jobs`
+
+**Avantajları:**
+✅ Daha temiz proje yapısı
+✅ Daha az dosya ve klasör
+✅ Frontend odaklı geliştirme
+✅ Daha hızlı kurulum
+
+**Ne Zaman Kullanılmalı:**
+- Sadece frontend geliştirme yapıyorsanız
+- API backend ayrı bir projede ise
+- E-posta gönderme, background job gibi özellikler gerekmiyorsa
 
 ### Yeni Sayfa Ekleme
 
@@ -65,11 +109,21 @@ rails-frontend add-page urunler
 ```
 
 Her sayfa için otomatik olarak oluşturulur:
-- Controller (`app/controllers/SAYFA_ADI_controller.rb`)
-- View (`app/views/SAYFA_ADI/index.html.erb`)
+- View (`app/views/home/SAYFA_ADI.html.erb`) - home klasöründe
 - CSS dosyası (`app/assets/stylesheets/SAYFA_ADI.css`)
 - Stimulus controller (`app/javascript/controllers/SAYFA_ADI_controller.js`)
-- Route (`/SAYFA_ADI`)
+- Home controller'a action eklenir
+- Route (`/SAYFA_ADI` -> `home#SAYFA_ADI`)
+
+### Server Başlatma
+
+```bash
+rails-frontend run
+# veya
+rails-f r
+```
+
+Bu komut `bin/dev` dosyasını çalıştırarak Rails server'ı başlatır.
 
 ### Sayfa Silme
 
@@ -84,7 +138,7 @@ rails-f dp SAYFA_ADI
 rails-frontend delete-page iletisim
 ```
 
-⚠️ **Not:** Home sayfası silinemez.
+⚠️ **Not:** Ana sayfa (home/index) silinemez.
 
 ## 📁 Proje Yapısı
 
@@ -94,10 +148,12 @@ Yeni oluşturulan projeler şu yapıya sahiptir:
 proje_adi/
 ├── app/
 │   ├── controllers/
-│   │   └── home_controller.rb
+│   │   └── home_controller.rb  (tüm action'lar burada)
 │   ├── views/
 │   │   ├── home/
-│   │   │   └── index.html.erb
+│   │   │   ├── index.html.erb
+│   │   │   ├── hakkimizda.html.erb
+│   │   │   └── iletisim.html.erb
 │   │   ├── shared/
 │   │   │   ├── _header.html.erb
 │   │   │   ├── _navbar.html.erb
@@ -249,10 +305,12 @@ Routes otomatik olarak yapılandırılır:
 # config/routes.rb
 Rails.application.routes.draw do
   root "home#index"
-  get '/hakkimizda', to: 'hakkimizda#index'
-  get '/iletisim', to: 'iletisim#index'
+  get '/hakkimizda', to: 'home#hakkimizda'
+  get '/iletisim', to: 'home#iletisim'
 end
 ```
+
+**Not:** Tüm sayfalar home controller kullanır.
 
 ### Named Routes Kullanımı
 
@@ -266,11 +324,15 @@ end
 
 | Komut | Kısa İsim | Açıklama |
 |-------|-----------|----------|
-| `rails-frontend new PROJE` | `rails-f n PROJE` | Yeni proje oluştur |
+| `rails-frontend new PROJE [--clean]` | `rails-f n PROJE [--clean]` | Yeni proje oluştur |
 | `rails-frontend add-page SAYFA` | `rails-f ap SAYFA` | Sayfa ekle |
 | `rails-frontend delete-page SAYFA` | `rails-f dp SAYFA` | Sayfa sil |
+| `rails-frontend run` | `rails-f r` | Server başlat (bin/dev) |
 | `rails-frontend version` | `rails-f -v` | Versiyon göster |
 | `rails-frontend help` | `rails-f -h` | Yardım göster |
+
+**Seçenekler:**
+- `--clean`: Frontend için gereksiz dosyaları temizle (önerilen)
 
 ## 🔧 Sık Karşılaşılan Sorunlar
 
@@ -366,13 +428,15 @@ Kullanımı:
 
 ## 🎯 Örnek Proje Akışı
 
+### Standart Proje
+
 ```bash
 # 1. Yeni proje oluştur
 rails-frontend new blog
 cd blog
 
 # 2. Server'ı başlat
-bin/rails server
+rails-frontend run
 
 # 3. Yeni terminal açıp sayfalar ekle
 rails-frontend add-page hakkimizda
@@ -382,10 +446,26 @@ rails-frontend add-page iletisim
 # 4. Shared componentleri özelleştir
 # app/views/shared/_header.html.erb dosyasını düzenle
 
-# 5. Tailwind watch başlat (opsiyonel)
-bin/rails tailwindcss:watch
+# 5. Geliştirmeye başla!
+```
 
-# 6. Geliştirmeye başla!
+### Temiz Frontend Projesi (Önerilen)
+
+```bash
+# 1. Temiz proje oluştur
+rails-frontend new portfolio --clean
+cd portfolio
+
+# 2. Server'ı başlat
+rails-frontend run
+
+# 3. Sayfalar ekle
+rails-f ap projeler
+rails-f ap yetenekler
+rails-f ap iletisim
+
+# 4. Geliştirmeye başla!
+# Gereksiz dosyalar olmadan temiz bir yapı
 ```
 
 ## 📚 Ek Kaynaklar

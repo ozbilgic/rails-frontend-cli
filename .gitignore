@@ -1,0 +1,14 @@
+# Test dosyaları
+test_*
+demo_*
+
+# Geçici dosyalar
+*.swp
+*.swo
+*~
+.DS_Store
+
+# IDE dosyaları
+.idea/
+.vscode/
+*.sublime-*
