@@ -5,7 +5,7 @@ require 'fileutils'
 require 'optparse'
 
 class RailsFrontendCLI
-  VERSION = "1.0.0"
+  VERSION = "1.0.1"
 
   def initialize
     @proje_adi = nil
@@ -43,6 +43,18 @@ class RailsFrontendCLI
         hata_mesaji("Sayfa adı belirtilmedi. Kullanım: rails-frontend delete-page SAYFA_ADI")
       end
       sayfa_sil
+    when 'add-stimulus', 'as'
+      @controller_adi = args[1]
+      if @controller_adi.nil? || @controller_adi.empty?
+        hata_mesaji("Controller adı belirtilmedi. Kullanım: rails-frontend add-stimulus CONTROLLER_ADI")
+      end
+      stimulus_ekle
+    when 'delete-stimulus', 'ds'
+      @controller_adi = args[1]
+      if @controller_adi.nil? || @controller_adi.empty?
+        hata_mesaji("Controller adı belirtilmedi. Kullanım: rails-frontend delete-stimulus CONTROLLER_ADI")
+      end
+      stimulus_sil
     when 'run', 'r'
       server_calistir
     when 'version', '-v', '--version'
@@ -225,6 +237,81 @@ class RailsFrontendCLI
     basari_mesaji("Route kaldırıldı")
 
     puts "\n #{renklendir('Sayfa başarıyla silindi!', :yesil)}"
+  end
+
+  def stimulus_ekle
+    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    baslik_goster("Stimulus Controller Oluşturuluyor: #{@controller_adi}")
+
+    # Controller adını normalize et
+    controller_adi_normalized = normalize_isim(@controller_adi)
+
+    # Stimulus controller oluştur
+    adim_goster(1, "Stimulus controller oluşturuluyor...")
+    olustur_stimulus_controller(controller_adi_normalized)
+    basari_mesaji("Stimulus controller oluşturuldu")
+
+    puts "\n #{renklendir('Stimulus controller başarıyla oluşturuldu!', :yesil)}"
+    puts "Dosya: #{renklendir("app/javascript/controllers/#{controller_adi_normalized}_controller.js", :mavi)}"
+  end
+
+  def stimulus_sil
+    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    baslik_goster("Stimulus Controller Siliniyor: #{@controller_adi}")
+
+    # Controller adını normalize et
+    controller_adi_normalized = normalize_isim(@controller_adi)
+    controller_file = "app/javascript/controllers/#{controller_adi_normalized}_controller.js"
+
+    # Controller dosyasının varlığını kontrol et
+    unless File.exist?(controller_file)
+      hata_mesaji("Stimulus controller bulunamadı: #{controller_file}")
+    end
+
+    # View dosyalarında kullanım kontrolü
+    adim_goster(1, "View dosyalarında kullanım kontrol ediliyor...")
+    kullanilan_dosyalar = []
+    
+    if Dir.exist?('app/views')
+      Dir.glob('app/views/**/*.html.erb').each do |view_file|
+        content = File.read(view_file)
+        # data-controller="controller_adi" veya data-controller='controller_adi' kontrolü
+        if content.match?(/data-controller=["'].*#{controller_adi_normalized}.*["']/)
+          kullanilan_dosyalar << view_file
+        end
+      end
+    end
+
+    if kullanilan_dosyalar.any?
+      puts "\n"
+      puts renklendir("UYARI: Bu controller aşağıdaki dosyalarda kullanılıyor:", :sari, bold: true)
+      kullanilan_dosyalar.each do |dosya|
+        puts "  - #{dosya}"
+      end
+      puts "\n"
+      print renklendir("Yine de silmek istiyor musunuz? (y/n): ", :sari)
+      cevap = STDIN.gets.chomp.downcase
+      unless cevap == 'y' || cevap == 'yes'
+        puts "\nİşlem iptal edildi."
+        exit 0
+      end
+    end
+    basari_mesaji("Kontrol tamamlandı")
+
+    # Controller'ı sil
+    adim_goster(2, "Stimulus controller siliniyor...")
+    FileUtils.rm_f(controller_file)
+    basari_mesaji("Stimulus controller silindi")
+
+    puts "\n #{renklendir('Stimulus controller başarıyla silindi!', :yesil)}"
   end
 
   # Helper metodlar
