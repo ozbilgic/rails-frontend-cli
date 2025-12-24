@@ -17,8 +17,8 @@ Eğitim materyali:
 ✅ Rails 7+ ile uyumlu  
 ✅ Tailwind CSS otomatik yapılandırma  
 ✅ Stimulus controller desteği  
-✅ Shared componentler (header, navbar, footer) 
-✅ Layout ekleme desteği
+✅ Shared componentler (header, navbar, footer)  
+✅ Layout ekleme desteği  
 ✅ Harici javascript kütüphanesi ekleme desteği  
 ✅ Otomatik route yapılandırması  
 ✅ CSS dosyaları otomatik import  
@@ -126,7 +126,7 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 
 ## Author
 
-Levent Özbilgiç
+Levent Özbilgiç  
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leventozbilgic/)
 
 ## Lisans
