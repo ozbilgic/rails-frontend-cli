@@ -112,30 +112,30 @@ class RailsFrontendCLI
       olustur_css_dosyalari
       basari_mesaji("CSS dosyaları oluşturuldu")
 
-      # Adım 6 (veya 5): Stimulus controller oluştur
-      adim_goster(5 + adim_offset, "Stimulus controller oluşturuluyor...")
-      olustur_stimulus_controller('home')
-      basari_mesaji("Stimulus controller oluşturuldu")
-
-      # Adım 7 (veya 6): Asset klasörleri oluştur
-      adim_goster(6 + adim_offset, "Asset klasörleri oluşturuluyor...")
+      # Adım 6 (veya 5): Asset klasörleri oluştur
+      adim_goster(5 + adim_offset, "Asset klasörleri oluşturuluyor...")
       olustur_asset_klasorleri
       basari_mesaji("Asset klasörleri oluşturuldu")
 
-      # Adım 8 (veya 7): Layout dosyasını güncelle
-      adim_goster(7 + adim_offset, "Layout dosyası güncelleniyor...")
+      # Adım 7 (veya 6): Layout dosyasını güncelle
+      adim_goster(6 + adim_offset, "Layout dosyası güncelleniyor...")
       guncelle_layout
       basari_mesaji("Layout dosyası güncellendi")
 
-      # Adım 9 (veya 8): Routes yapılandır
-      adim_goster(8 + adim_offset, "Routes yapılandırılıyor...")
+      # Adım 8 (veya 7): Routes yapılandır
+      adim_goster(7 + adim_offset, "Routes yapılandırılıyor...")
       guncelle_routes('home', 'index', root: true)
       basari_mesaji("Routes yapılandırıldı")
 
-      # Adım 10 (veya 9): Tailwind yapılandırmasını güncelle
-      adim_goster(9 + adim_offset, "Tailwind yapılandırması güncelleniyor...")
+      # Adım 9 (veya 8): Tailwind yapılandırmasını güncelle
+      adim_goster(8 + adim_offset, "Tailwind yapılandırması güncelleniyor...")
       guncelle_tailwind_config
       basari_mesaji("Tailwind yapılandırması güncellendi")
+
+      # Adım 10 (veya 9): Procfile.dev yapılandır
+      adim_goster(9 + adim_offset, "Procfile.dev yapılandırılıyor...")
+      guncelle_procfile
+      basari_mesaji("Procfile.dev yapılandırıldı")
     end
 
     tamamlandi_mesaji
@@ -162,18 +162,13 @@ class RailsFrontendCLI
     olustur_css(sayfa_adi_normalized)
     basari_mesaji("CSS dosyası oluşturuldu")
 
-    # Adım 3: Stimulus controller oluştur
-    adim_goster(3, "Stimulus controller oluşturuluyor...")
-    olustur_stimulus_controller(sayfa_adi_normalized)
-    basari_mesaji("Stimulus controller oluşturuldu")
-
-    # Adım 4: Home controller'a action ekle
-    adim_goster(4, "Home controller güncelleniyor...")
+    # Adım 3: Home controller'a action ekle
+    adim_goster(3, "Home controller güncelleniyor...")
     home_controller_action_ekle(sayfa_adi_normalized)
     basari_mesaji("Home controller güncellendi")
 
-    # Adım 5: Route ekle
-    adim_goster(5, "Route ekleniyor...")
+    # Adım 4: Route ekle
+    adim_goster(4, "Route ekleniyor...")
     guncelle_routes(sayfa_adi_normalized, sayfa_adi_normalized)
     basari_mesaji("Route eklendi")
 
@@ -219,18 +214,13 @@ class RailsFrontendCLI
     FileUtils.rm_f("app/assets/stylesheets/#{sayfa_adi_normalized}.css")
     basari_mesaji("CSS dosyası silindi")
 
-    # Adım 3: Stimulus controller sil
-    adim_goster(3, "Stimulus controller siliniyor...")
-    FileUtils.rm_f("app/javascript/controllers/#{sayfa_adi_normalized}_controller.js")
-    basari_mesaji("Stimulus controller silindi")
-
-    # Adım 4: Home controller'dan action'ı kaldır
-    adim_goster(4, "Home controller güncelleniyor...")
+    # Adım 3: Home controller'dan action'ı kaldır
+    adim_goster(3, "Home controller güncelleniyor...")
     home_controller_action_kaldir(sayfa_adi_normalized)
     basari_mesaji("Home controller güncellendi")
 
-    # Adım 5: Route'u kaldır
-    adim_goster(5, "Route kaldırılıyor...")
+    # Adım 4: Route'u kaldır
+    adim_goster(4, "Route kaldırılıyor...")
     kaldir_route(sayfa_adi_normalized)
     basari_mesaji("Route kaldırıldı")
 
@@ -675,6 +665,17 @@ class RailsFrontendCLI
         File.write(app_css_path, app_css)
       end
     end
+  end
+
+  def guncelle_procfile
+    procfile_path = 'Procfile.dev'
+    
+    procfile_content = <<~PROCFILE
+      web: bin/rails server -b 0.0.0.0
+      css: bin/rails tailwindcss:watch
+    PROCFILE
+    
+    File.write(procfile_path, procfile_content)
   end
 
   # Mesaj metodları
