@@ -1,11 +1,35 @@
 # Versiyon Geçmişi
 
-## v1.0.1 (24 Aralık 2024)
+## v1.0.2
+
+### Yeni Özellikler
+- **Layout Yönetimi:**
+  - `rails-frontend add-layout LAYOUT_ADI` komutu eklendi (kısa: `al`)
+  - `rails-frontend remove-layout LAYOUT_ADI` komutu eklendi (kısa: `rl`)
+  - Otomatik view eşleştirme (layout adı ile view adı eşleşiyorsa)
+  - Kullanıcıya view seçimi sorma (eşleşme yoksa)
+  - Aynı view için çift layout kontrolü
+  - Controller'a otomatik layout direktifi ekleme/kaldırma
+
+### Geliştirmeler
+- Layout dosyası oluşturma (`app/views/layouts/`)
+- `home_controller.rb`'ye `layout "layout_adi", only: :view_adi` direktifi ekleme
+- Layout silme öncesi onay mekanizması
+- Mevcut layout kontrolü ile çakışma önleme
+
+### Dokümantasyon
+- README.md güncellendi
+- KULLANIM_KILAVUZU.md'ye layout yönetimi bölümü eklendi
+- Komut referansı tabloları güncellendi
+
+---
+
+## v1.0.1
 
 ### Yeni Özellikler
 - **Stimulus Controller Yönetimi:**
   - `rails-frontend add-stimulus CONTROLLER_ADI` komutu eklendi (kısa: `as`)
-  - `rails-frontend delete-stimulus CONTROLLER_ADI` komutu eklendi (kısa: `ds`)
+  - `rails-frontend remove-stimulus CONTROLLER_ADI` komutu eklendi (kısa: `ds`)
   - Stimulus controller silme öncesi view dosyalarında kullanım kontrolü
   - Kullanılan controller'lar için uyarı ve onay mekanizması
 
@@ -27,7 +51,7 @@
 
 - **Sayfa Yönetimi:**
   - `rails-frontend add-page SAYFA_ADI` komutu
-  - `rails-frontend delete-page SAYFA_ADI` komutu
+  - `rails-frontend remove-page SAYFA_ADI` komutu
   - Otomatik view, CSS ve Stimulus controller oluşturma
   - Otomatik route yapılandırması
 

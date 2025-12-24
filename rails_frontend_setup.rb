@@ -5,7 +5,9 @@ require 'fileutils'
 require 'optparse'
 
 class RailsFrontendCLI
-  VERSION = "1.0.1"
+  VERSION  = "1.0.2"
+  AUTHOR   = "Levent Özbilgiç"
+  LINKEDIN = "https://www.linkedin.com/in/leventozbilgic/"
 
   def initialize
     @proje_adi = nil
@@ -55,6 +57,18 @@ class RailsFrontendCLI
         hata_mesaji("Controller adı belirtilmedi. Kullanım: rails-frontend remove-stimulus CONTROLLER_ADI")
       end
       stimulus_sil
+    when 'add-layout', 'al'
+      @layout_adi = args[1]
+      if @layout_adi.nil? || @layout_adi.empty?
+        hata_mesaji("Layout adı belirtilmedi. Kullanım: rails-frontend add-layout LAYOUT_ADI")
+      end
+      layout_ekle
+    when 'remove-layout', 'rl'
+      @layout_adi = args[1]
+      if @layout_adi.nil? || @layout_adi.empty?
+        hata_mesaji("Layout adı belirtilmedi. Kullanım: rails-frontend remove-layout LAYOUT_ADI")
+      end
+      layout_sil
     when 'run', 'r'
       server_calistir
     when 'version', '-v', '--version'
@@ -312,6 +326,116 @@ class RailsFrontendCLI
     basari_mesaji("Stimulus controller silindi")
 
     puts "\n #{renklendir('Stimulus controller başarıyla silindi!', :yesil)}"
+  end
+
+  def layout_ekle
+    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    baslik_goster("Layout Oluşturuluyor: #{@layout_adi}")
+
+    # Layout adını normalize et
+    layout_adi_normalized = normalize_isim(@layout_adi)
+
+    # Layout dosyasının zaten var olup olmadığını kontrol et
+    layout_file = "app/views/layouts/#{layout_adi_normalized}.html.erb"
+    if File.exist?(layout_file)
+      hata_mesaji("Layout zaten mevcut: #{layout_file}")
+    end
+
+    # app/views/home klasöründeki dosyaları tara
+    adim_goster(1, "View dosyaları taranıyor...")
+    home_views = home_views_listele
+    basari_mesaji("View dosyaları tarandı")
+
+    # Eşleşen view dosyası kontrolü
+    view_adi = nil
+    if home_views.include?(layout_adi_normalized)
+      # Eşleşen view var
+      view_adi = layout_adi_normalized
+      puts "\n#{renklendir("Eşleşen view dosyası bulundu: #{view_adi}.html.erb", :yesil)}"
+    else
+      # Eşleşen view yok, kullanıcıya sor
+      if home_views.empty?
+        hata_mesaji("app/views/home klasöründe view dosyası bulunamadı!")
+      end
+
+      puts "\n#{renklendir("Bu layout hangi view ile kullanılacak?", :sari, bold: true)}"
+      home_views.each_with_index do |view, index|
+        puts "  #{index + 1}. #{view}"
+      end
+      print "\nSeçim (1-#{home_views.length}): "
+      secim = STDIN.gets.chomp.to_i
+
+      if secim < 1 || secim > home_views.length
+        hata_mesaji("Geçersiz seçim!")
+      end
+
+      view_adi = home_views[secim - 1]
+    end
+
+    # Aynı view için mevcut layout kontrolü
+    adim_goster(2, "Mevcut layout kontrol ediliyor...")
+    mevcut_layout = view_icin_mevcut_layout_bul(view_adi)
+    if mevcut_layout
+      basari_mesaji("Kontrol tamamlandı")
+      hata_mesaji("'#{view_adi}' view'i için zaten bir layout tanımlı: '#{mevcut_layout}'\nÖnce mevcut layout'u kaldırın: rails-frontend remove-layout #{mevcut_layout}")
+    end
+    basari_mesaji("Kontrol tamamlandı")
+
+    # Layout dosyası oluştur
+    adim_goster(3, "Layout dosyası oluşturuluyor...")
+    olustur_layout_dosyasi(layout_adi_normalized)
+    basari_mesaji("Layout dosyası oluşturuldu")
+
+    # Controller'a layout direktifi ekle
+    adim_goster(4, "Home controller güncelleniyor...")
+    layout_direktifi_ekle(layout_adi_normalized, view_adi)
+    basari_mesaji("Home controller güncellendi")
+
+    puts "\n #{renklendir('Layout başarıyla oluşturuldu!', :yesil)}"
+    puts "Layout dosyası: #{renklendir(layout_file, :mavi)}"
+    puts "Kullanılacağı view: #{renklendir("#{view_adi}.html.erb", :mavi)}"
+  end
+
+  def layout_sil
+    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    baslik_goster("Layout Siliniyor: #{@layout_adi}")
+
+    # Layout adını normalize et
+    layout_adi_normalized = normalize_isim(@layout_adi)
+    layout_file = "app/views/layouts/#{layout_adi_normalized}.html.erb"
+
+    # Layout dosyasının varlığını kontrol et
+    unless File.exist?(layout_file)
+      hata_mesaji("Layout bulunamadı: #{layout_file}")
+    end
+
+    # Onay iste
+    print renklendir("'#{layout_adi_normalized}' layout'unu silmek istediğinizden emin misiniz? (y/n): ", :sari)
+    cevap = STDIN.gets.chomp.downcase
+    unless cevap == 'y' || cevap == 'yes'
+      puts "\nİşlem iptal edildi."
+      exit 0
+    end
+
+    # Controller'dan layout direktifini kaldır
+    adim_goster(1, "Home controller güncelleniyor...")
+    layout_direktifi_kaldir(layout_adi_normalized)
+    basari_mesaji("Home controller güncellendi")
+
+    # Layout dosyasını sil
+    adim_goster(2, "Layout dosyası siliniyor...")
+    FileUtils.rm_f(layout_file)
+    basari_mesaji("Layout dosyası silindi")
+
+    puts "\n #{renklendir('Layout başarıyla silindi!', :yesil)}"
   end
 
   # Helper metodlar
@@ -763,6 +887,95 @@ class RailsFrontendCLI
     PROCFILE
     
     File.write(procfile_path, procfile_content)
+  end
+
+  def home_views_listele
+    views = []
+    if Dir.exist?('app/views/home')
+      Dir.glob('app/views/home/*.html.erb').each do |file|
+        basename = File.basename(file, '.html.erb')
+        # index'i hariç tut
+        views << basename unless basename == 'index'
+      end
+    end
+    views.sort
+  end
+
+  def olustur_layout_dosyasi(layout_adi)
+    FileUtils.mkdir_p('app/views/layouts')
+    
+    layout_content = <<~HTML
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>#{layout_adi.capitalize}</title>
+          <meta name="viewport" content="width=device-width,initial-scale=1">
+          <%= csrf_meta_tags %>
+          <%= csp_meta_tag %>
+          <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+          <%= javascript_importmap_tags %>
+        </head>
+
+        <body>
+          <%= yield %>
+        </body>
+      </html>
+    HTML
+
+    File.write("app/views/layouts/#{layout_adi}.html.erb", layout_content)
+  end
+
+  def layout_direktifi_ekle(layout_adi, view_adi)
+    controller_file = 'app/controllers/home_controller.rb'
+    unless File.exist?(controller_file)
+      hata_mesaji("Home controller bulunamadı: #{controller_file}")
+    end
+
+    controller_content = File.read(controller_file)
+    
+    # Layout direktifi zaten var mı kontrol et
+    if controller_content.match?(/layout\s+["']#{layout_adi}["']/)
+      puts "\n#{renklendir("UYARI: Bu layout direktifi zaten mevcut!", :sari)}"
+      return
+    end
+
+    # Class tanımından sonra layout direktifini ekle
+    layout_line = "  layout \"#{layout_adi}\", only: :#{view_adi}\n"
+    
+    if controller_content.match?(/class\s+HomeController\s*<\s*ApplicationController\s*\n/)
+      controller_content.sub!(/class\s+HomeController\s*<\s*ApplicationController\s*\n/) do |match|
+        "#{match}#{layout_line}\n"
+      end
+    else
+      hata_mesaji("HomeController class tanımı bulunamadı!")
+    end
+
+    File.write(controller_file, controller_content)
+  end
+
+  def layout_direktifi_kaldir(layout_adi)
+    controller_file = 'app/controllers/home_controller.rb'
+    unless File.exist?(controller_file)
+      hata_mesaji("Home controller bulunamadı: #{controller_file}")
+    end
+
+    controller_content = File.read(controller_file)
+    
+    # Layout direktifini bul ve kaldır
+    controller_content.gsub!(/^\s*layout\s+["']#{layout_adi}["'].*\n/, '')
+    
+    File.write(controller_file, controller_content)
+  end
+
+  def view_icin_mevcut_layout_bul(view_adi)
+    controller_file = 'app/controllers/home_controller.rb'
+    return nil unless File.exist?(controller_file)
+
+    controller_content = File.read(controller_file)
+    
+    # layout "layout_adi", only: :view_adi pattern'ini ara
+    match = controller_content.match(/layout\s+["']([^"']+)["'].*only:\s*:#{view_adi}\b/)
+    match ? match[1] : nil
   end
 
   # Mesaj metodları

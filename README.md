@@ -64,6 +64,13 @@ rails-frontend remove-page iletisim
 
 # Stimulus controller sil (kullanım kontrolü yapar)
 rails-frontend remove-stimulus dropdown
+
+# Layout ekle
+rails-frontend add-layout iletisim
+rails-frontend al ozel
+
+# Layout sil
+rails-frontend remove-layout iletisim
 ```
 
 **`--clean` Parametresi:**
@@ -78,6 +85,8 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 | `rails-frontend remove-page SAYFA` | `rp` | Sayfa sil |
 | `rails-frontend add-stimulus CONTROLLER` | `as` | Stimulus controller ekle |
 | `rails-frontend remove-stimulus CONTROLLER` | `rs` | Stimulus controller sil |
+| `rails-frontend add-layout LAYOUT` | `al` | Layout ekle |
+| `rails-frontend remove-layout LAYOUT` | `rl` | Layout sil |
 | `rails-frontend run` | `r` | Server başlat (bin/dev) |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |

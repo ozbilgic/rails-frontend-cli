@@ -180,6 +180,90 @@ UYARI: Bu controller aşağıdaki dosyalarda kullanılıyor:
 Yine de silmek istiyor musunuz? (y/n):
 ```
 
+### Layout Ekleme
+
+```bash
+rails-frontend add-layout LAYOUT_ADI
+# veya kısa isim
+rails-frontend al LAYOUT_ADI
+```
+
+**Örnekler:**
+```bash
+cd blog
+rails-frontend add-layout iletisim
+rails-frontend al ozel
+```
+
+**Nasıl Çalışır:**
+1. Layout adı ile eşleşen view dosyası aranır
+2. Eşleşen view varsa otomatik olarak eşleştirilir
+3. Eşleşen view yoksa kullanıcıya hangi view ile kullanılacağı sorulur
+4. Aynı view için mevcut layout kontrolü yapılır
+5. Layout dosyası oluşturulur (`app/views/layouts/`)
+6. `home_controller.rb`'ye layout direktifi eklenir
+
+**Oluşturulan Dosya:**
+```erb
+<!-- app/views/layouts/iletisim.html.erb -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Iletisim</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body>
+    <%= yield %>
+  </body>
+</html>
+```
+
+**Controller Güncellemesi:**
+```ruby
+# app/controllers/home_controller.rb
+class HomeController < ApplicationController
+  layout "iletisim", only: :iletisim
+
+  def index
+  end
+  
+  def iletisim
+  end
+end
+```
+
+### Layout Silme
+
+```bash
+rails-frontend remove-layout LAYOUT_ADI
+# veya kısa isim
+rails-frontend rl LAYOUT_ADI
+```
+
+**Örnekler:**
+```bash
+rails-frontend remove-layout iletisim
+rails-frontend rl ozel
+```
+
+**Önemli:** Bu komut silmeden önce:
+1. Layout dosyasının varlığını kontrol eder
+2. Kullanıcıdan onay ister
+3. Controller'dan layout direktifini kaldırır
+4. Layout dosyasını siler
+
+**Çift Layout Kontrolü:**
+Aynı view için birden fazla layout tanımlanamaz. Eğer bir view için zaten layout tanımlıysa:
+```
+HATA: 'iletisim' view'i için zaten bir layout tanımlı: 'iletisim'
+Önce mevcut layout'u kaldırın: rails-frontend remove-layout iletisim
+```
+
 ## Proje Yapısı
 
 Yeni oluşturulan projeler şu yapıya sahiptir:
@@ -366,9 +450,11 @@ end
 |-------|-----------|----------|
 | `rails-frontend new PROJE [--clean]` | `n` | Yeni proje oluştur |
 | `rails-frontend add-page SAYFA` | `ap` | Sayfa ekle |
-| `rails-frontend remove-page SAYFA` | `dp` | Sayfa sil |
+| `rails-frontend remove-page SAYFA` | `rp` | Sayfa sil |
 | `rails-frontend add-stimulus CONTROLLER` | `as` | Stimulus controller ekle |
-| `rails-frontend remove-stimulus CONTROLLER` | `ds` | Stimulus controller sil |
+| `rails-frontend remove-stimulus CONTROLLER` | `rs` | Stimulus controller sil |
+| `rails-frontend add-layout LAYOUT` | `al` | Layout ekle |
+| `rails-frontend remove-layout LAYOUT` | `rl` | Layout sil |
 | `rails-frontend run` | `r` | Server başlat (bin/dev) |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |
