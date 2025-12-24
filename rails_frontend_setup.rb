@@ -5,9 +5,10 @@ require 'fileutils'
 require 'optparse'
 
 class RailsFrontendCLI
-  VERSION  = "1.0.2"
+  VERSION  = "1.0.3"
   AUTHOR   = "Levent Özbilgiç"
   LINKEDIN = "https://www.linkedin.com/in/leventozbilgic/"
+  GITHUB   = "https://github.com/ozbilgic"
 
   def initialize
     @proje_adi = nil
@@ -69,6 +70,18 @@ class RailsFrontendCLI
         hata_mesaji("Layout adı belirtilmedi. Kullanım: rails-frontend remove-layout LAYOUT_ADI")
       end
       layout_sil
+    when 'add-pin', 'pin'
+      @pin_adi = args[1]
+      if @pin_adi.nil? || @pin_adi.empty?
+        hata_mesaji("Pin adı belirtilmedi. Kullanım: rails-frontend add-pin PAKET_ADI")
+      end
+      pin_ekle
+    when 'remove-pin', 'unpin'
+      @pin_adi = args[1]
+      if @pin_adi.nil? || @pin_adi.empty?
+        hata_mesaji("Pin adı belirtilmedi. Kullanım: rails-frontend remove-pin PAKET_ADI")
+      end
+      pin_sil
     when 'run', 'r'
       server_calistir
     when 'version', '-v', '--version'
@@ -436,6 +449,91 @@ class RailsFrontendCLI
     basari_mesaji("Layout dosyası silindi")
 
     puts "\n #{renklendir('Layout başarıyla silindi!', :yesil)}"
+  end
+
+  def pin_ekle
+    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    baslik_goster("Importmap Pin Ekleniyor: #{@pin_adi}")
+
+    # bin/importmap dosyasının varlığını kontrol et
+    unless File.exist?('bin/importmap')
+      hata_mesaji("bin/importmap bulunamadı! Bu proje importmap kullanmıyor olabilir.")
+    end
+
+    # bin/importmap pin komutunu çalıştır
+    adim_goster(1, "Pin ekleniyor...")
+    output = `bin/importmap pin #{@pin_adi} 2>&1`
+    
+    # Çıktıda hata kontrolü
+    if output.include?("Couldn't find") || output.include?("error") || output.include?("Error")
+      puts "" # Yeni satır
+      hata_mesaji("Pin eklenemedi! Paket bulunamadı: #{@pin_adi}")
+    end
+    
+    basari_mesaji("Pin eklendi")
+
+    puts "\n #{renklendir('Pin başarıyla eklendi!', :yesil)}"
+    puts " #{renklendir('Kullanmak için projenize import etmeyi unutmayın!', :yesil)}"
+    puts "Paket: #{renklendir(@pin_adi, :mavi)}"
+  end
+
+  def pin_sil
+    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
+    unless rails_projesi_mi?
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
+
+    baslik_goster("Importmap Pin Siliniyor: #{@pin_adi}")
+
+    # bin/importmap dosyasının varlığını kontrol et
+    unless File.exist?('bin/importmap')
+      hata_mesaji("bin/importmap bulunamadı! Bu proje importmap kullanmıyor olabilir.")
+    end
+
+    # JavaScript ve HTML dosyalarında kullanım kontrolü
+    adim_goster(1, "Kullanım kontrol ediliyor...")
+    kullanilan_dosyalar = pin_kullanim_kontrol(@pin_adi)
+    basari_mesaji("Kontrol tamamlandı")
+
+    if kullanilan_dosyalar.any?
+      puts "\n"
+      puts renklendir("UYARI: Bu paket aşağıdaki dosyalarda kullanılıyor:", :sari, bold: true)
+      kullanilan_dosyalar.each do |dosya|
+        puts "  - #{dosya}"
+      end
+      puts "\n"
+      print renklendir("Yine de silmek istiyor musunuz? (y/n): ", :sari)
+      cevap = STDIN.gets.chomp.downcase
+      unless cevap == 'y' || cevap == 'yes'
+        puts "\nİşlem iptal edildi."
+        exit 0
+      end
+    end
+
+    # Pin'in varlığını kontrol et
+    adim_goster(2, "Pin kontrol ediliyor...")
+    importmap_file = 'config/importmap.rb'
+    unless File.exist?(importmap_file)
+      hata_mesaji("config/importmap.rb bulunamadı!")
+    end
+    
+    importmap_content = File.read(importmap_file)
+    unless importmap_content.match?(/pin\s+["']#{Regexp.escape(@pin_adi)}["']/)
+      puts "" # Yeni satır
+      hata_mesaji("Pin bulunamadı! '#{@pin_adi}' importmap'te tanımlı değil.")
+    end
+    basari_mesaji("Pin bulundu")
+
+    # bin/importmap unpin komutunu çalıştır
+    adim_goster(3, "Pin siliniyor...")
+    output = `bin/importmap unpin #{@pin_adi} 2>&1`
+    basari_mesaji("Pin silindi")
+
+    puts "\n #{renklendir('Pin başarıyla silindi!', :yesil)}"
   end
 
   # Helper metodlar
@@ -978,6 +1076,38 @@ class RailsFrontendCLI
     match ? match[1] : nil
   end
 
+  def pin_kullanim_kontrol(pin_adi)
+    kullanilan_dosyalar = []
+    
+    # JavaScript dosyalarında ara
+    if Dir.exist?('app/javascript')
+      Dir.glob('app/javascript/**/*.js').each do |file|
+        content = File.read(file)
+        # import veya from ile tam eşleşme kontrolü
+        # Örnek: from "alpinejs" veya import "chart.js" veya import Alpine from "alpinejs"
+        if content.match?(/from\s+["']#{Regexp.escape(pin_adi)}["']/) || 
+           content.match?(/import\s+["']#{Regexp.escape(pin_adi)}["']/) ||
+           content.match?(/import\s+.+\s+from\s+["']#{Regexp.escape(pin_adi)}["']/)
+          kullanilan_dosyalar << file
+        end
+      end
+    end
+    
+    # HTML/ERB dosyalarında ara
+    if Dir.exist?('app/views')
+      Dir.glob('app/views/**/*.html.erb').each do |file|
+        content = File.read(file)
+        # script tag içinde veya importmap içinde tam eşleşme kontrolü
+        # Tırnak içinde tam eşleşme arıyoruz
+        if content.match?(/["']#{Regexp.escape(pin_adi)}["']/)
+          kullanilan_dosyalar << file
+        end
+      end
+    end
+    
+    kullanilan_dosyalar.uniq
+  end
+
   # Mesaj metodları
   def baslik_goster(mesaj)
     puts "\n" + "=" * 60
@@ -1015,52 +1145,84 @@ class RailsFrontendCLI
   end
 
   def yardim_goster
-    puts <<~HELP
-      #{renklendir('Rails Frontend CLI', :mavi, bold: true)} - v#{VERSION}
-      
-      #{renklendir('Kullanım:', :sari)}
-        rails-frontend KOMUT [ARGÜMANLAR] [SEÇENEKLER]
-
-      #{renklendir('Komutlar:', :sari)}
-        new, n PROJE_ADI [--clean]    Yeni Rails frontend projesi oluştur
-        add-page, ap SAYFA_ADI        Mevcut projeye yeni sayfa ekle
-        delete-page, dp SAYFA_ADI     Mevcut projeden sayfa sil
-        run, r                        Rails server'ı başlat (bin/dev)
-        version, -v, --version        Versiyon bilgisini göster
-        help, -h, --help              Bu yardım mesajını göster
-
-      #{renklendir('Seçenekler:', :sari)}
-        --clean                       Frontend için gereksiz dosyaları temizle
-                                      (test, mailers, jobs, channels, vb.)
-
-      #{renklendir('Örnekler:', :sari)}
-        # Standart proje
-        rails-frontend new blog
+    baslik_goster("Rails Frontend CLI v#{VERSION}")
+    
+    puts renklendir("Frontend geliştiriciler için Rails proje yönetim aracı", :mavi)
+    puts ""
+    puts renklendir("KULLANIM:", :sari, bold: true)
+    puts "  rails-frontend KOMUT [PARAMETRELER]"
+    puts ""
+    
+    puts renklendir("KOMUTLAR:", :sari, bold: true)
+    puts <<~KOMUTLAR
+      Proje Yönetimi:
+        new, n PROJE_ADI [--clean]  Yeni Rails frontend projesi oluştur
+        run, r                      Server başlat (bin/dev)
         
-        # Temiz frontend projesi (önerilen)
+      Sayfa Yönetimi:
+        add-page, ap SAYFA_ADI      Yeni sayfa ekle (view + CSS + route)
+        remove-page, rp SAYFA_ADI   Sayfa sil
+        
+      Stimulus Controller:
+        add-stimulus, as CONTROLLER Stimulus controller ekle
+        remove-stimulus, rs CONTROLLER Stimulus controller sil (kullanım kontrolü yapar)
+        
+      Layout Yönetimi:
+        add-layout, al LAYOUT_ADI   Layout ekle (view eşleştirme ile)
+        remove-layout, rl LAYOUT_ADI Layout sil
+        
+      JavaScript Kütüphaneleri:
+        add-pin, pin PAKET_ADI      Harici JavaScript kütüphanesi ekle
+        remove-pin, unpin PAKET_ADI Harici JavaScript kütüphanesi sil (kullanım kontrolü yapar)
+        
+      Bilgi:
+        version, -v, --version      Versiyon bilgisi göster
+        help, -h, --help            Bu yardım mesajını göster
+    KOMUTLAR
+    
+    puts renklendir("SEÇENEKLER:", :sari, bold: true)
+    puts "  --clean                     Frontend için gereksiz dosyaları temizle"
+    puts "                              (test, mailers, jobs, channels, models vb.)"
+    puts ""
+    
+    puts renklendir("ÖRNEKLER:", :sari, bold: true)
+    puts <<~ORNEKLER
+      Yeni proje oluştur:
         rails-frontend new blog --clean
         
-        cd blog
+      Sayfa ekle:
+        rails-frontend add-page hakkımızda
+        rails-frontend add-page iletişim
+        
+      Layout ekle:
+        rails-frontend add-layout iletisim
+        
+      JavaScript kütüphanesi ekle:
+        rails-frontend add-pin alpinejs
+        rails-frontend add-pin sweetalert2
+        
+      Stimulus controller ekle:
+        rails-frontend add-stimulus dropdown
+        
+      Server başlat:
         rails-frontend run
-        
-        # Yeni sayfa ekle
-        rails-frontend add-page hakkimizda
-        rails-frontend add-page iletisim
-        
-        # Sayfa sil
-        rails-frontend remove-page iletisim
-
-      #{renklendir('Özellikler:', :sari)}
-        - Rails 7+ ile uyumlu
-        - Frontend odaklı yapılandırma (--clean ile)
-        - Tailwind CSS otomatik yapılandırma
-        - Stimulus controller desteği
-        - Shared componentler (header, navbar, footer)
-        - Tek controller yapısı (home controller)
-        - Otomatik route yapılandırması
-        - CSS dosyaları otomatik import
-        - Asset klasörleri (images, fonts)
-    HELP
+    ORNEKLER
+    
+    puts renklendir("ÖZELLİKLER:", :sari, bold: true)
+    puts "  ✅ Rails 7+ ile uyumlu"
+    puts "  ✅ Tailwind CSS otomatik yapılandırma"
+    puts "  ✅ Stimulus controller desteği"
+    puts "  ✅ Layout yönetimi"
+    puts "  ✅ Harici JavaScript kütüphanesi yönetimi"
+    puts "  ✅ Shared componentler (header, navbar, footer)"
+    puts "  ✅ Otomatik route yapılandırması"
+    puts "  ✅ Türkçe karakter desteği"
+    puts ""
+    
+    puts renklendir("DAHA FAZLA BİLGİ:", :mavi)
+    puts "  Detaylı kullanım kılavuzu: KULLANIM_KILAVUZU.md"
+    puts "  GitHub: https://github.com/ozbilgic/rails-frontend-cli"
+    puts ""
   end
 
   def renklendir(metin, renk, bold: false)

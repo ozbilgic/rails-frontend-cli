@@ -1,5 +1,29 @@
 # Versiyon Geçmişi
 
+## v1.0.3
+
+### Yeni Özellikler
+- **Harici Javascript Yönetimi:**
+  - `rails-frontend add-pin PAKET_ADI` komutu eklendi (kısa: `pin`)
+  - `rails-frontend remove-pin PAKET_ADI` komutu eklendi (kısa: `unpin`)
+  - Paket bulunamadığında hata kontrolü
+  - Pin silmeden önce kullanım kontrolü (JavaScript ve HTML dosyalarında)
+
+### Geliştirmeler
+- JavaScript dosyalarında import kontrolü (`app/javascript/**/*.js`)
+- HTML dosyalarında kullanım kontrolü (`app/views/**/*.html.erb`)
+- Pin varlık kontrolü (`config/importmap.rb`)
+- Kullanıcıya import hatırlatması
+- Hata mesajları iyileştirildi
+
+### Dokümantasyon
+- README.md güncellendi
+- KULLANIM_KILAVUZU.md'ye harici javascript yönetimi bölümü eklendi
+- Komut referansı tabloları güncellendi
+- Rails ile Frontend Kodlama Eğitim materyali eklendi.
+
+---
+
 ## v1.0.2
 
 ### Yeni Özellikler
@@ -52,9 +76,8 @@
 - **Sayfa Yönetimi:**
   - `rails-frontend add-page SAYFA_ADI` komutu
   - `rails-frontend remove-page SAYFA_ADI` komutu
-  - Otomatik view, CSS ve Stimulus controller oluşturma
-  - Otomatik route yapılandırması
-
+  - Otomatik view, CSS ve route oluşturma
+ 
 - **Geliştirme Araçları:**
   - `rails-frontend run` komutu (server başlatma)
   - Türkçe karakter desteği (otomatik normalize)
@@ -63,7 +86,6 @@
 - **Temizlik Özellikleri (`--clean`):**
   - Test dosyalarını atlama
   - Gereksiz Rails özelliklerini kaldırma (mailers, jobs, channels, models)
-  - `.kamal` klasörünü temizleme
 
 ### Dokümantasyon
 - Türkçe README.md

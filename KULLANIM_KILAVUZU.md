@@ -2,6 +2,12 @@
 
 Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukça kolaylaştıran, ruby yada rails bilinmesine gerek kalmadan rails ile frontend kodlamayı sevdiren bir araç.
 
+## Rails ile Frontend Kodlama Eğitimi
+
+Eğitim materyali:
+📚 [Rails ile Frontend Kodlama Eğitimi (PDF)](Rails-ile-Frontend-Kodlama-Egitimi.pdf)
+📚 [Çevrimiçi Slayt (gamma.app)](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
+
 ## Kurulum
 
 ### Otomatik Kurulum (Önerilen)
@@ -39,7 +45,7 @@ rails-frontend version
 
 ```bash
 # Temiz frontend projesi (önerilen)
-# Frontend için gerekli olmayan dosyalar oluşturulmaz (--skip-test vs..)
+# Frontend için gerekli olmayan dosyalar oluşturulmaz
 rails-frontend new blog --clean
 cd blog
 rails-frontend run
@@ -86,15 +92,14 @@ rails-frontend add-page SAYFA_ADI
 **Örnekler:**
 ```bash
 cd blog
-rails-frontend add-page hakkimizda
-rails-frontend add-page iletisim
-rails-frontend add-page urunler
+rails-frontend add-page hakkımızda
+rails-frontend add-page iletişim
+rails-frontend add-page ürünler
 ```
 
 Her sayfa için otomatik olarak oluşturulur:
 - View (`app/views/home/SAYFA_ADI.html.erb`) - home klasöründe
 - CSS dosyası (`app/assets/stylesheets/SAYFA_ADI.css`)
-- Stimulus controller (`app/javascript/controllers/SAYFA_ADI_controller.js`)
 - Home controller'a action eklenir
 - Route (`/SAYFA_ADI` -> `home#SAYFA_ADI`)
 
@@ -114,7 +119,7 @@ rails-frontend remove-page SAYFA_ADI
 
 **Örnek:**
 ```bash
-rails-frontend remove-page iletisim
+rails-frontend remove-page iletişim
 ```
 
 **Not:** Ana sayfa (home/index) silinemez.
@@ -123,46 +128,30 @@ rails-frontend remove-page iletisim
 
 ```bash
 rails-frontend add-stimulus CONTROLLER_ADI
-# veya kısa isim
-rails-frontend as CONTROLLER_ADI
 ```
 
 **Örnekler:**
 ```bash
 cd blog
 rails-frontend add-stimulus dropdown
-rails-frontend as modal
-rails-frontend as tabs
+rails-frontend add-stimulus modal
+rails-frontend add-stimulus tabs
 ```
 
 Bu komut otomatik olarak oluşturur:
 - Stimulus controller (`app/javascript/controllers/CONTROLLER_ADI_controller.js`)
 - Türkçe karakterler normalize edilir
 
-**Oluşturulan Dosya:**
-```javascript
-// app/javascript/controllers/dropdown_controller.js
-import { Controller } from "@hotwired/stimulus"
-
-export default class extends Controller {
-  connect() {
-    console.log("Dropdown controller connected!")
-  }
-}
-```
-
 ### Stimulus Controller Silme
 
 ```bash
 rails-frontend remove-stimulus CONTROLLER_ADI
-# veya kısa isim
-rails-frontend ds CONTROLLER_ADI
 ```
 
 **Örnekler:**
 ```bash
 rails-frontend remove-stimulus dropdown
-rails-frontend ds modal
+rails-frontend remove-stimulus modal
 ```
 
 **Önemli:** Bu komut silmeden önce:
@@ -184,85 +173,80 @@ Yine de silmek istiyor musunuz? (y/n):
 
 ```bash
 rails-frontend add-layout LAYOUT_ADI
-# veya kısa isim
-rails-frontend al LAYOUT_ADI
 ```
 
 **Örnekler:**
 ```bash
 cd blog
 rails-frontend add-layout iletisim
-rails-frontend al ozel
 ```
 
 **Nasıl Çalışır:**
 1. Layout adı ile eşleşen view dosyası aranır
-2. Eşleşen view varsa otomatik olarak eşleştirilir
+2. Eşleşen view varsa otomatik olarak layout dosyası oluşturulur
 3. Eşleşen view yoksa kullanıcıya hangi view ile kullanılacağı sorulur
 4. Aynı view için mevcut layout kontrolü yapılır
 5. Layout dosyası oluşturulur (`app/views/layouts/`)
-6. `home_controller.rb`'ye layout direktifi eklenir
-
-**Oluşturulan Dosya:**
-```erb
-<!-- app/views/layouts/iletisim.html.erb -->
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Iletisim</title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
-  </head>
-
-  <body>
-    <%= yield %>
-  </body>
-</html>
-```
-
-**Controller Güncellemesi:**
-```ruby
-# app/controllers/home_controller.rb
-class HomeController < ApplicationController
-  layout "iletisim", only: :iletisim
-
-  def index
-  end
-  
-  def iletisim
-  end
-end
-```
+6. `home_controller.rb`'ye layout ataması eklenir
 
 ### Layout Silme
 
 ```bash
 rails-frontend remove-layout LAYOUT_ADI
-# veya kısa isim
-rails-frontend rl LAYOUT_ADI
 ```
 
 **Örnekler:**
 ```bash
 rails-frontend remove-layout iletisim
-rails-frontend rl ozel
 ```
 
 **Önemli:** Bu komut silmeden önce:
 1. Layout dosyasının varlığını kontrol eder
 2. Kullanıcıdan onay ister
-3. Controller'dan layout direktifini kaldırır
+3. Controller'dan layout atamasını kaldırır
 4. Layout dosyasını siler
 
-**Çift Layout Kontrolü:**
-Aynı view için birden fazla layout tanımlanamaz. Eğer bir view için zaten layout tanımlıysa:
+### Javascript Kütüphanesi Ekleme
+
+```bash
+rails-frontend add-pin PAKET_ADI
 ```
-HATA: 'iletisim' view'i için zaten bir layout tanımlı: 'iletisim'
-Önce mevcut layout'u kaldırın: rails-frontend remove-layout iletisim
+
+**Örnekler:**
+```bash
+cd blog
+rails-frontend add-pin alpinejs
+rails-frontend add-pin sweetalert2
+rails-frontend add-pin chart.js
 ```
+
+**Nasıl Çalışır:**
+1. Paket jspm'den bulunup `config/importmap.rb`'ye eklenir
+2. Başarılı olursa kullanıcıya import hatırlatması yapılır
+
+**Önemli:** Pin ekledikten sonra JavaScript dosyanıza import etmeyi unutmayın:
+```javascript
+// app/javascript/application.js
+import Swal from "sweetalert2"
+```
+
+### Javascript Kütüphanesi Silme
+
+```bash
+rails-frontend remove-pin PAKET_ADI
+```
+
+**Örnekler:**
+```bash
+rails-frontend remove-pin alpinejs
+rails-frontend remove-pin sweetalert2
+```
+
+**Önemli:** Bu komut silmeden önce:
+1. JavaScript dosyalarında kullanım kontrolü yapar (`app/javascript/**/*.js`)
+2. HTML dosyalarında kullanım kontrolü yapar (`app/views/**/*.html.erb`)
+3. Pin'in `config/importmap.rb`'de olup olmadığını kontrol eder
+4. Kullanılıyorsa kullanıcıya uyarı gösterir ve onay ister
 
 ## Proje Yapısı
 
@@ -324,39 +308,7 @@ Her sayfa için otomatik oluşturulan CSS dosyasını kullanabilirsiniz:
 
 CSS dosyaları otomatik olarak `application.tailwind.css` dosyasına import edilir.
 
-## Stimulus Controller Kullanımı
-
-Her sayfa için otomatik olarak bir Stimulus controller oluşturulur.
-
-### Temel Kullanım
-
-**HTML (View):**
-```html
-<div data-controller="hakkimizda">
-  <button data-action="click->hakkimizda#greet">Tıkla</button>
-  <p data-hakkimizda-target="output"></p>
-</div>
-```
-
-**JavaScript (Controller):**
-```javascript
-// app/javascript/controllers/hakkimizda_controller.js
-import { Controller } from "@hotwired/stimulus"
-
-export default class extends Controller {
-  static targets = ["output"]
-
-  connect() {
-    console.log("Hakkimizda controller bağlandı")
-  }
-
-  greet() {
-    this.outputTarget.textContent = "Merhaba!"
-  }
-}
-```
-
-### Stimulus Özellikleri
+### Stimulus Özellikleri ve Kullanım Örneği
 
 - **Targets:** DOM elementlerine kolay erişim
 - **Actions:** Event handling
@@ -385,7 +337,8 @@ export default class extends Controller {
 
 ## Shared Componentler
 
-Layout dosyası otomatik olarak shared componentleri içerir:
+Ana layout dosyası otomatik olarak shared componentleri içerir:
+Dilediğiniz gibi düzenleyebilirsiniz.
 
 ```erb
 <!-- app/views/layouts/application.html.erb -->
@@ -400,43 +353,7 @@ Layout dosyası otomatik olarak shared componentleri içerir:
 </body>
 ```
 
-### Componentleri Özelleştirme
-
-**Header:**
-```erb
-<!-- app/views/shared/_header.html.erb -->
-<header class="bg-white shadow-sm">
-  <nav class="container mx-auto px-4 py-4">
-    <div class="flex items-center justify-between">
-      <div class="text-2xl font-bold text-indigo-600">
-        <%= link_to "Blog", root_path %>
-      </div>
-      <div class="hidden md:flex space-x-6">
-        <%= link_to "Ana Sayfa", root_path, class: "text-gray-700 hover:text-indigo-600" %>
-        <%= link_to "Hakkımızda", hakkimizda_path, class: "text-gray-700 hover:text-indigo-600" %>
-        <%= link_to "İletişim", iletisim_path, class: "text-gray-700 hover:text-indigo-600" %>
-      </div>
-    </div>
-  </nav>
-</header>
-```
-
-## Routes
-
-Routes otomatik olarak yapılandırılır:
-
-```ruby
-# config/routes.rb
-Rails.application.routes.draw do
-  root "home#index"
-  get '/hakkimizda', to: 'home#hakkimizda'
-  get '/iletisim', to: 'home#iletisim'
-end
-```
-
-**Not:** Tüm sayfalar home controller kullanır.
-
-### Routes Kullanımı
+### Link Kullanımı
 
 ```erb
 <%= link_to "Ana Sayfa", root_path %>
@@ -455,7 +372,9 @@ end
 | `rails-frontend remove-stimulus CONTROLLER` | `rs` | Stimulus controller sil |
 | `rails-frontend add-layout LAYOUT` | `al` | Layout ekle |
 | `rails-frontend remove-layout LAYOUT` | `rl` | Layout sil |
-| `rails-frontend run` | `r` | Server başlat (bin/dev) |
+| `rails-frontend add-pin PAKET` | `pin` | Harici javascript kütüphanesi ekle |
+| `rails-frontend remove-pin PAKET` | `unpin` | Harici javascript kütüphanesi sil |
+| `rails-frontend run` | `r` | Server başlat |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |
 
@@ -499,24 +418,12 @@ bin/rails assets:precompile
 
 **Sorun:** Sayfa adlarında Türkçe karakter kullanıldığında hata
 
-**Çözüm:** Araç otomatik olarak Türkçe karakterleri dönüştürür:
+**Çözüm:** Türkçe karakterler artık otomatik olarak dönüştürülüyor:
 - `hakkımızda` → `hakkimizda`
 - `ürünler` → `urunler`
 - `iletişim` → `iletisim`
 
 ## İpuçları
-
-### 1. Sayfa Şablonu Oluşturma
-
-Sık kullanılan sayfa yapıları için kendi şablonlarınızı oluşturun:
-
-```erb
-<!-- app/views/shared/_page_template.html.erb -->
-<div class="container mx-auto px-4 py-16">
-  <h1 class="text-4xl font-bold mb-8"><%= title %></h1>
-  <%= yield %>
-</div>
-```
 
 ### 2. Component Kütüphanesi
 
@@ -535,51 +442,11 @@ Kullanımı:
 <%= render 'shared/card', title: 'Başlık', content: 'İçerik' %>
 ```
 
-## Örnek Proje Akışı
-
-### Temiz Frontend Projesi (Önerilen)
-
-```bash
-# 1. Temiz proje oluştur
-rails-frontend new portfolio --clean
-cd portfolio
-
-# 2. Server'ı başlat
-rails-frontend run
-
-# 3. Sayfalar ekle
-rails-frontend add-page projeler
-rails-frontend add-page yetenekler
-rails-frontend add-page iletisim
-
-# 4. Geliştirmeye başla!
-```
-
-### Standart Proje
-
-```bash
-# 1. Yeni proje oluştur
-rails-frontend new blog
-cd blog
-
-# 2. Server'ı başlat
-rails-frontend run
-
-# 3. Yeni terminal açıp sayfalar ekle
-rails-frontend add-page hakkimizda
-rails-frontend add-page yazilar
-rails-frontend add-page iletisim
-
-# 4. Shared componentleri özelleştir
-# app/views/shared/_header.html.erb dosyasını düzenle
-
-# 5. Geliştirmeye başla!
-```
-
 ## Ek Kaynaklar
 
 - **Tailwind CSS:** https://tailwindcss.com/docs
 - **Stimulus:** https://stimulus.hotwired.dev/
+- **SCSS:** https://sass-lang.com/documentation/syntax/
 
 ## Destek
 
@@ -592,6 +459,7 @@ Sorun yaşarsanız:
 ## Author
 
 Levent Özbilgiç
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leventozbilgic/)
 
 ## Lisans
 

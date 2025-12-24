@@ -6,12 +6,20 @@ Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukç
 
 Detaylı kullanım kılavuzu için [KULLANIM_KILAVUZU.md](KULLANIM_KILAVUZU.md) dosyasına bakın.
 
+## Rails ile Frontend Kodlama Eğitimi
+
+Eğitim materyali:
+📚 [Rails ile Frontend Kodlama Eğitimi (PDF)](Rails-ile-Frontend-Kodlama-Egitimi.pdf)
+📚 [Çevrimiçi Slayt (gamma.app)](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
+
 ## Özellikler
 
 ✅ Rails 7+ ile uyumlu  
 ✅ Tailwind CSS otomatik yapılandırma  
 ✅ Stimulus controller desteği  
-✅ Shared componentler (header, navbar, footer)  
+✅ Shared componentler (header, navbar, footer) 
+✅ Layout ekleme desteği
+✅ Harici javascript kütüphanesi ekleme desteği  
 ✅ Otomatik route yapılandırması  
 ✅ CSS dosyaları otomatik import  
 ✅ Asset klasörleri (images, fonts)  
@@ -42,6 +50,14 @@ export PATH="$PATH:$(pwd)"
 source ~/.bashrc
 ```
 
+### Kurulumu Test Et
+
+```bash
+rails-frontend --version
+# veya
+rails-frontend version
+```
+
 ### Kullanım
 
 ```bash
@@ -67,10 +83,17 @@ rails-frontend remove-stimulus dropdown
 
 # Layout ekle
 rails-frontend add-layout iletisim
-rails-frontend al ozel
 
 # Layout sil
 rails-frontend remove-layout iletisim
+
+# Harici javascript kütüphanesi ekle
+rails-frontend add-pin alpinejs
+rails-frontend add-pin sweetalert2
+
+# Harici javascript kütüphanesi sil (kullanım kontrolü yapar)
+rails-frontend remove-pin alpinejs
+rails-frontend remove-pin sweetalert2
 ```
 
 **`--clean` Parametresi:**
@@ -87,7 +110,9 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 | `rails-frontend remove-stimulus CONTROLLER` | `rs` | Stimulus controller sil |
 | `rails-frontend add-layout LAYOUT` | `al` | Layout ekle |
 | `rails-frontend remove-layout LAYOUT` | `rl` | Layout sil |
-| `rails-frontend run` | `r` | Server başlat (bin/dev) |
+| `rails-frontend add-pin PAKET` | `pin` | Harici javascript kütüphanesi ekle |
+| `rails-frontend remove-pin PAKET` | `unpin` | Harici javascript kütüphanesi sil |
+| `rails-frontend run` | `r` | Server başlat |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |
 
@@ -98,11 +123,11 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 
 - Ruby 3.0+
 - Rails 7+
-- Node.js (Tailwind CSS için)
 
 ## Author
 
 Levent Özbilgiç
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leventozbilgic/)
 
 ## Lisans
 
