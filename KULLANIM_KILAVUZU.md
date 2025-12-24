@@ -1,6 +1,6 @@
 # Rails Frontend CLI - Kullanım Kılavuzu
 
-Frontend geliştiriciler için hazırlanmış, Rails projesi oluşturma ve yönetme aracı.
+Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukça kolaylaştıran, ruby yada rails bilinmesine gerek kalmadan rails ile frontend kodlamayı sevdiren bir araç.
 
 ## Kurulum
 

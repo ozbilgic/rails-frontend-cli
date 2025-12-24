@@ -1,6 +1,10 @@
 # Rails Frontend CLI
 
-Frontend geliştiriciler için hazırlanmış Rails projesi oluşturma ve yönetme aracı.
+Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukça kolaylaştıran, ruby yada rails bilinmesine gerek kalmadan rails ile frontend kodlamayı sevdiren bir araç.
+
+## Dokümantasyon
+
+Detaylı kullanım kılavuzu için [KULLANIM_KILAVUZU.md](KULLANIM_KILAVUZU.md) dosyasına bakın.
 
 ## Özellikler
 
@@ -76,10 +80,6 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 
 **Seçenekler:**
 - `--clean`: Frontend için gereksiz dosyaları temizle (önerilen)
-
-## Dokümantasyon
-
-Detaylı kullanım kılavuzu için [KULLANIM_KILAVUZU.md](KULLANIM_KILAVUZU.md) dosyasına bakın.
 
 ## Gereksinimler
 
