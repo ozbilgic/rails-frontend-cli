@@ -119,6 +119,67 @@ rails-frontend delete-page iletisim
 
 **Not:** Ana sayfa (home/index) silinemez.
 
+### Stimulus Controller Ekleme
+
+```bash
+rails-frontend add-stimulus CONTROLLER_ADI
+# veya kısa isim
+rails-frontend as CONTROLLER_ADI
+```
+
+**Örnekler:**
+```bash
+cd blog
+rails-frontend add-stimulus dropdown
+rails-frontend as modal
+rails-frontend as tabs
+```
+
+Bu komut otomatik olarak oluşturur:
+- Stimulus controller (`app/javascript/controllers/CONTROLLER_ADI_controller.js`)
+- Türkçe karakterler normalize edilir
+
+**Oluşturulan Dosya:**
+```javascript
+// app/javascript/controllers/dropdown_controller.js
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  connect() {
+    console.log("Dropdown controller connected!")
+  }
+}
+```
+
+### Stimulus Controller Silme
+
+```bash
+rails-frontend delete-stimulus CONTROLLER_ADI
+# veya kısa isim
+rails-frontend ds CONTROLLER_ADI
+```
+
+**Örnekler:**
+```bash
+rails-frontend delete-stimulus dropdown
+rails-frontend ds modal
+```
+
+**Önemli:** Bu komut silmeden önce:
+1. Controller dosyasının varlığını kontrol eder
+2. `app/views` altındaki tüm HTML dosyalarında kullanım kontrolü yapar
+3. Eğer controller kullanılıyorsa, kullanılan dosyaları listeler
+4. Kullanıcıdan onay ister
+
+**Örnek Çıktı:**
+```
+UYARI: Bu controller aşağıdaki dosyalarda kullanılıyor:
+  - app/views/home/index.html.erb
+  - app/views/home/products.html.erb
+
+Yine de silmek istiyor musunuz? (y/n):
+```
+
 ## Proje Yapısı
 
 Yeni oluşturulan projeler şu yapıya sahiptir:
@@ -303,12 +364,14 @@ end
 
 | Komut | Kısa İsim | Açıklama |
 |-------|-----------|----------|
-| `rails-frontend new PROJE [--clean]` | Yeni proje oluştur |
-| `rails-frontend add-page SAYFA` | Sayfa ekle |
-| `rails-frontend delete-page SAYFA` | Sayfa sil |
-| `rails-frontend run` | Server başlat (bin/dev) |
-| `rails-frontend version` | Versiyon göster |
-| `rails-frontend help` | Yardım göster |
+| `rails-frontend new PROJE [--clean]` | `n` | Yeni proje oluştur |
+| `rails-frontend add-page SAYFA` | `ap` | Sayfa ekle |
+| `rails-frontend delete-page SAYFA` | `dp` | Sayfa sil |
+| `rails-frontend add-stimulus CONTROLLER` | `as` | Stimulus controller ekle |
+| `rails-frontend delete-stimulus CONTROLLER` | `ds` | Stimulus controller sil |
+| `rails-frontend run` | `r` | Server başlat (bin/dev) |
+| `rails-frontend version` | `-v` | Versiyon göster |
+| `rails-frontend help` | `-h` | Yardım göster |
 
 ## Sık Karşılaşılan Sorunlar
 
