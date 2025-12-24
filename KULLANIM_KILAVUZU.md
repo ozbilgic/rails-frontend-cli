@@ -109,12 +109,12 @@ Bu komut `bin/dev` dosyasını çalıştırarak Rails server'ı başlatır.
 ### Sayfa Silme
 
 ```bash
-rails-frontend delete-page SAYFA_ADI
+rails-frontend remove-page SAYFA_ADI
 ```
 
 **Örnek:**
 ```bash
-rails-frontend delete-page iletisim
+rails-frontend remove-page iletisim
 ```
 
 **Not:** Ana sayfa (home/index) silinemez.
@@ -154,14 +154,14 @@ export default class extends Controller {
 ### Stimulus Controller Silme
 
 ```bash
-rails-frontend delete-stimulus CONTROLLER_ADI
+rails-frontend remove-stimulus CONTROLLER_ADI
 # veya kısa isim
 rails-frontend ds CONTROLLER_ADI
 ```
 
 **Örnekler:**
 ```bash
-rails-frontend delete-stimulus dropdown
+rails-frontend remove-stimulus dropdown
 rails-frontend ds modal
 ```
 
@@ -366,9 +366,9 @@ end
 |-------|-----------|----------|
 | `rails-frontend new PROJE [--clean]` | `n` | Yeni proje oluştur |
 | `rails-frontend add-page SAYFA` | `ap` | Sayfa ekle |
-| `rails-frontend delete-page SAYFA` | `dp` | Sayfa sil |
+| `rails-frontend remove-page SAYFA` | `dp` | Sayfa sil |
 | `rails-frontend add-stimulus CONTROLLER` | `as` | Stimulus controller ekle |
-| `rails-frontend delete-stimulus CONTROLLER` | `ds` | Stimulus controller sil |
+| `rails-frontend remove-stimulus CONTROLLER` | `ds` | Stimulus controller sil |
 | `rails-frontend run` | `r` | Server başlat (bin/dev) |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |
@@ -502,6 +502,10 @@ Sorun yaşarsanız:
 1. `rails-frontend help` komutunu çalıştırın
 2. Rails log dosyalarını kontrol edin: `log/development.log`
 3. Browser console'u kontrol edin (F12)
+
+## Author
+
+Levent Özbilgiç
 
 ## Lisans
 

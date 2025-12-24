@@ -37,10 +37,10 @@ class RailsFrontendCLI
         hata_mesaji("Sayfa adı belirtilmedi. Kullanım: rails-frontend add-page SAYFA_ADI")
       end
       sayfa_ekle
-    when 'delete-page', 'dp'
+    when 'remove-page', 'rp'
       @sayfa_adi = args[1]
       if @sayfa_adi.nil? || @sayfa_adi.empty?
-        hata_mesaji("Sayfa adı belirtilmedi. Kullanım: rails-frontend delete-page SAYFA_ADI")
+        hata_mesaji("Sayfa adı belirtilmedi. Kullanım: rails-frontend remove-page SAYFA_ADI")
       end
       sayfa_sil
     when 'add-stimulus', 'as'
@@ -49,10 +49,10 @@ class RailsFrontendCLI
         hata_mesaji("Controller adı belirtilmedi. Kullanım: rails-frontend add-stimulus CONTROLLER_ADI")
       end
       stimulus_ekle
-    when 'delete-stimulus', 'ds'
+    when 'remove-stimulus', 'rs'
       @controller_adi = args[1]
       if @controller_adi.nil? || @controller_adi.empty?
-        hata_mesaji("Controller adı belirtilmedi. Kullanım: rails-frontend delete-stimulus CONTROLLER_ADI")
+        hata_mesaji("Controller adı belirtilmedi. Kullanım: rails-frontend remove-stimulus CONTROLLER_ADI")
       end
       stimulus_sil
     when 'run', 'r'
@@ -447,7 +447,7 @@ class RailsFrontendCLI
     # View klasörü ve dosyası oluştur
     FileUtils.mkdir_p('app/views/home')
     view_content = <<~HTML
-      <div data-controller="home">
+      <div>
         <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
           <div class="container mx-auto px-4 py-16">
             <div class="text-center">
@@ -709,7 +709,7 @@ class RailsFrontendCLI
     FileUtils.mkdir_p("app/views/home")
 
     view_content = <<~HTML
-      <div data-controller="#{sayfa_adi}">
+      <div>
         <div class="container mx-auto px-4 py-16">
           <h1 class="text-4xl font-bold text-gray-900 mb-4">
             #{sayfa_adi.capitalize}
@@ -797,7 +797,7 @@ class RailsFrontendCLI
     puts "\n#{renklendir('Yeni sayfa eklemek için:', :mavi)}"
     puts "  rails-frontend add-page SAYFA_ADI"
     puts "\n#{renklendir('Sayfa silmek için:', :mavi)}"
-    puts "  rails-frontend delete-page SAYFA_ADI"
+    puts "  rails-frontend remove-page SAYFA_ADI"
     puts ""
   end
 
@@ -835,7 +835,7 @@ class RailsFrontendCLI
         rails-frontend add-page iletisim
         
         # Sayfa sil
-        rails-frontend delete-page iletisim
+        rails-frontend remove-page iletisim
 
       #{renklendir('Özellikler:', :sari)}
         - Rails 7+ ile uyumlu

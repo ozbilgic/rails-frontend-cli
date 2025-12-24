@@ -60,10 +60,10 @@ rails-frontend add-stimulus dropdown
 rails-frontend add-stimulus modal
 
 # Sayfa sil
-rails-frontend delete-page iletisim
+rails-frontend remove-page iletisim
 
 # Stimulus controller sil (kullanım kontrolü yapar)
-rails-frontend delete-stimulus dropdown
+rails-frontend remove-stimulus dropdown
 ```
 
 **`--clean` Parametresi:**
@@ -75,9 +75,9 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 |-------|------|----------|
 | `rails-frontend new PROJE [--clean]` | `n` | Yeni proje oluştur |
 | `rails-frontend add-page SAYFA` | `ap` | Sayfa ekle |
-| `rails-frontend delete-page SAYFA` | `dp` | Sayfa sil |
+| `rails-frontend remove-page SAYFA` | `rp` | Sayfa sil |
 | `rails-frontend add-stimulus CONTROLLER` | `as` | Stimulus controller ekle |
-| `rails-frontend delete-stimulus CONTROLLER` | `ds` | Stimulus controller sil |
+| `rails-frontend remove-stimulus CONTROLLER` | `rs` | Stimulus controller sil |
 | `rails-frontend run` | `r` | Server başlat (bin/dev) |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |
@@ -91,6 +91,15 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 - Rails 7+
 - Node.js (Tailwind CSS için)
 
+## Author
+
+Levent Özbilgiç
+
 ## Lisans
 
 MIT
+
+## Katkıda Bulunun
+
+build dalında rails-frontend build komutu ile tüm projeyi statik html,css,js'e çevirip kaydedecek bir komut
+üzerinde çalışıyorum. Bu konuda katkıda bulunmak isteyenler benimle iletişime geçebilirler.
