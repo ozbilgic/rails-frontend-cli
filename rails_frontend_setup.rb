@@ -616,7 +616,7 @@ class RailsFrontendCLI
     controller_path = 'app/controllers/home_controller.rb'
     return unless File.exist?(controller_path)
 
-    # Küçük bir gecikme ekle (ardı ardına işlemler için)
+    # Küçük bir gecikme ekle (ardı ardına işlemler için) 
     sleep(0.1)
 
     controller_content = File.read(controller_path)
