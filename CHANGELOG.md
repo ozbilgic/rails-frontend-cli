@@ -8,6 +8,11 @@
   - `rails-frontend remove-pin PAKET_ADI` komutu eklendi (kısa: `unpin`)
   - Paket bulunamadığında hata kontrolü
   - Pin silmeden önce kullanım kontrolü (JavaScript ve HTML dosyalarında)
+  - Tam eşleşme kontrolü (kısmi eşleşmeler göz ardı edilir)
+- **CLI Güncelleme:**
+  - `rails-frontend update` komutu eklendi (kısa: `u`)
+  - Git pull ile otomatik güncelleme
+  - Güncelleme kontrolü ve bilgilendirme
 
 ### Geliştirmeler
 - JavaScript dosyalarında import kontrolü (`app/javascript/**/*.js`)
