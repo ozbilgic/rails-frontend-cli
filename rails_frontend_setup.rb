@@ -602,7 +602,7 @@ class RailsFrontendCLI
         basari_mesaji("Güncelleme tamamlandı")
         puts "\n#{renklendir('✓ CLI başarıyla güncellendi!', :yesil)}"
         puts ""
-        puts "Terminali yeniden başlatın veya source ~/.bashrc komutunu çalıştırın."
+        puts "Terminali yeniden başlatın veya #{renklendir('source ~/.bashrc', :mavi)} komutunu çalıştırın."
         puts ""
       else
         puts ""
