@@ -4,9 +4,7 @@ Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukç
 
 ## Rails ile Frontend Kodlama Eğitimi
 
-Eğitim materyali:
-📚 [Rails ile Frontend Kodlama Eğitimi (PDF)](Rails-ile-Frontend-Kodlama-Egitimi.pdf)
-📚 [Çevrimiçi Slayt (gamma.app)](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
+📚 [Eğitim materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
 
 ## Kurulum
 
@@ -248,6 +246,12 @@ rails-frontend remove-pin sweetalert2
 3. Pin'in `config/importmap.rb`'de olup olmadığını kontrol eder
 4. Kullanılıyorsa kullanıcıya uyarı gösterir ve onay ister
 
+### CLI Güncelleme
+
+```bash
+rails-frontend update
+```
+
 ## Proje Yapısı
 
 Yeni oluşturulan projeler şu yapıya sahiptir:
@@ -374,6 +378,7 @@ Dilediğiniz gibi düzenleyebilirsiniz.
 | `rails-frontend remove-layout LAYOUT` | `rl` | Layout sil |
 | `rails-frontend add-pin PAKET` | `pin` | Harici javascript kütüphanesi ekle |
 | `rails-frontend remove-pin PAKET` | `unpin` | Harici javascript kütüphanesi sil |
+| `rails-frontend update` | `u` | CLI'yi güncelle |
 | `rails-frontend run` | `r` | Server başlat |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |

@@ -84,6 +84,8 @@ class RailsFrontendCLI
       pin_sil
     when 'run', 'r'
       server_calistir
+    when 'update', 'u'
+      cli_guncelle
     when 'version', '-v', '--version'
       puts "Rails Frontend CLI v#{VERSION}"
       exit 0
@@ -556,6 +558,60 @@ class RailsFrontendCLI
     exec('bin/dev')
   end
 
+  def cli_guncelle
+    baslik_goster("Rails Frontend CLI Güncelleniyor")
+    
+    # CLI'nin kurulu olduğu dizini bul
+    cli_path = File.expand_path('..', __FILE__)
+    
+    unless Dir.exist?(File.join(cli_path, '.git'))
+      hata_mesaji("Bu CLI git repository'den kurulmamış. Manuel güncelleme gerekiyor.")
+    end
+    
+    puts "CLI dizini: #{renklendir(cli_path, :mavi)}"
+    puts ""
+    
+    # Mevcut branch'i kontrol et
+    adim_goster(1, "Git durumu kontrol ediliyor...")
+    Dir.chdir(cli_path) do
+      current_branch = `git rev-parse --abbrev-ref HEAD`.strip
+      puts "Mevcut branch: #{renklendir(current_branch, :mavi)}"
+      basari_mesaji("Kontrol tamamlandı")
+      
+      # Güncellemeleri kontrol et
+      adim_goster(2, "Güncellemeler kontrol ediliyor...")
+      system("git fetch origin #{current_branch} 2>&1 > /dev/null")
+      
+      local_commit = `git rev-parse HEAD`.strip
+      remote_commit = `git rev-parse origin/#{current_branch}`.strip
+      
+      if local_commit == remote_commit
+        basari_mesaji("Kontrol tamamlandı")
+        puts "\n#{renklendir('✓', :yesil)} En güncel versiyonu kullanıyorsunuz! (v#{VERSION})"
+        puts ""
+        return
+      end
+      
+      basari_mesaji("Yeni güncelleme bulundu")
+      
+      # Güncelleme yap
+      adim_goster(3, "Güncelleme yapılıyor...")
+      output = `git pull origin #{current_branch} 2>&1`
+      
+      if $?.success?
+        basari_mesaji("Güncelleme tamamlandı")
+        puts "\n#{renklendir('✓ CLI başarıyla güncellendi!', :yesil)}"
+        puts ""
+        puts "Yeni versiyon bilgisi için: #{renklendir('rails-frontend --version', :mavi)}"
+        puts ""
+      else
+        puts ""
+        hata_mesaji("Güncelleme başarısız oldu!\n#{output}")
+      end
+    end
+  end
+
+  # Helper metodlar
   def home_controller_action_ekle(sayfa_adi)
     controller_path = 'app/controllers/home_controller.rb'
     return unless File.exist?(controller_path)
@@ -595,7 +651,7 @@ class RailsFrontendCLI
 
     controller_content = File.read(controller_path)
     
-    # Action'ı kaldır - daha güvenli regex
+    # Action'ı kaldır
     # "  def sayfa_adi" ile başlayan ve "  end" ile biten bloğu bul
     controller_content.gsub!(/^\s*def #{Regexp.escape(sayfa_adi)}\s*$.*?^\s*end\s*$/m, '')
     
@@ -1110,9 +1166,7 @@ class RailsFrontendCLI
 
   # Mesaj metodları
   def baslik_goster(mesaj)
-    puts "\n" + "=" * 60
     puts renklendir(mesaj, :mavi, bold: true)
-    puts "=" * 60 + "\n"
   end
 
   def adim_goster(numara, mesaj)
@@ -1130,9 +1184,7 @@ class RailsFrontendCLI
   end
 
   def tamamlandi_mesaji
-    puts "\n" + "=" * 60
     puts renklendir("Proje başarıyla oluşturuldu!", :yesil, bold: true)
-    puts "=" * 60
     puts "\n#{renklendir('Sonraki adımlar:', :mavi)}"
     puts "  1. cd #{@proje_adi}"
     puts "  2. rails-frontend run"
@@ -1176,6 +1228,7 @@ class RailsFrontendCLI
         remove-pin, unpin PAKET_ADI Harici JavaScript kütüphanesi sil (kullanım kontrolü yapar)
         
       Bilgi:
+        update, u                   CLI'yi güncelle (git pull)
         version, -v, --version      Versiyon bilgisi göster
         help, -h, --help            Bu yardım mesajını göster
     KOMUTLAR

@@ -8,9 +8,7 @@ Detaylı kullanım kılavuzu için [KULLANIM_KILAVUZU.md](KULLANIM_KILAVUZU.md) 
 
 ## Rails ile Frontend Kodlama Eğitimi
 
-Eğitim materyali:
-📚 [Rails ile Frontend Kodlama Eğitimi (PDF)](Rails-ile-Frontend-Kodlama-Egitimi.pdf)
-📚 [Çevrimiçi Slayt (gamma.app)](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
+📚 [Eğitim materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
 
 ## Özellikler
 
@@ -112,6 +110,7 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 | `rails-frontend remove-layout LAYOUT` | `rl` | Layout sil |
 | `rails-frontend add-pin PAKET` | `pin` | Harici javascript kütüphanesi ekle |
 | `rails-frontend remove-pin PAKET` | `unpin` | Harici javascript kütüphanesi sil |
+| `rails-frontend update` | `u` | CLI'yi güncelle |
 | `rails-frontend run` | `r` | Server başlat |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |
