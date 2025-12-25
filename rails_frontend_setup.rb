@@ -602,7 +602,7 @@ class RailsFrontendCLI
         basari_mesaji("Güncelleme tamamlandı")
         puts "\n#{renklendir('✓ CLI başarıyla güncellendi!', :yesil)}"
         puts ""
-        puts "Yeni versiyon bilgisi için: #{renklendir('rails-frontend --version', :mavi)}"
+        puts "Terminali yeniden başlatın veya source ~/.bashrc komutunu çalıştırın."
         puts ""
       else
         puts ""
