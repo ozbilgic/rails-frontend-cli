@@ -115,7 +115,8 @@ class RailsFrontendCLI
       rails_komut = "rails new #{@proje_adi} --css=tailwind --javascript=importmap " \
                     "--skip-test --skip-system-test --skip-action-mailer " \
                     "--skip-action-mailbox --skip-action-text --skip-active-job " \
-                    "--skip-action-cable"
+                    "--skip-action-cable --skip-active-storage --skip-active-record "\
+                    "--skip-solid --skip-kamal --skip-docker"
     else
       rails_komut = "rails new #{@proje_adi} --css=tailwind --javascript=importmap"
     end
@@ -179,9 +180,7 @@ class RailsFrontendCLI
 
   def sayfa_ekle
     # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     baslik_goster("Yeni Sayfa Ekleniyor: #{@sayfa_adi}")
 
@@ -213,9 +212,7 @@ class RailsFrontendCLI
   end
 
   def sayfa_sil
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     baslik_goster("Sayfa Siliniyor: #{@sayfa_adi}")
 
@@ -265,9 +262,7 @@ class RailsFrontendCLI
 
   def stimulus_ekle
     # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     baslik_goster("Stimulus Controller Oluşturuluyor: #{@controller_adi}")
 
@@ -285,9 +280,7 @@ class RailsFrontendCLI
 
   def stimulus_sil
     # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     baslik_goster("Stimulus Controller Siliniyor: #{@controller_adi}")
 
@@ -340,9 +333,7 @@ class RailsFrontendCLI
 
   def layout_ekle
     # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     baslik_goster("Layout Oluşturuluyor: #{@layout_adi}")
 
@@ -412,9 +403,7 @@ class RailsFrontendCLI
 
   def layout_sil
     # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     baslik_goster("Layout Siliniyor: #{@layout_adi}")
 
@@ -450,9 +439,7 @@ class RailsFrontendCLI
 
   def pin_ekle
     # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     baslik_goster("Importmap Pin Ekleniyor: #{@pin_adi}")
 
@@ -480,9 +467,7 @@ class RailsFrontendCLI
 
   def pin_sil
     # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     baslik_goster("Importmap Pin Siliniyor: #{@pin_adi}")
 
@@ -535,13 +520,13 @@ class RailsFrontendCLI
 
   # Helper metodlar
   def rails_projesi_mi?
-    File.exist?('config/routes.rb') && File.exist?('Gemfile')
+    unless File.exist?('config/routes.rb') && File.exist?('Gemfile')
+      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+    end
   end
 
   def server_calistir
-    unless rails_projesi_mi?
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
-    end
+    rails_projesi_mi?
 
     unless File.exist?('bin/dev')
       hata_mesaji("bin/dev dosyası bulunamadı! Bu proje Rails 7+ ile oluşturulmamış olabilir.")
@@ -659,35 +644,19 @@ class RailsFrontendCLI
   def temizle_gereksiz_dosyalar
     # Frontend için gereksiz dosya ve klasörleri sil
     gereksiz_dosyalar = [
-      'app/mailers',
-      'app/jobs',
+      '.github',
       'app/models',
-      'test',
-      'app/channels',
-      '.kamal',
-      'config/cable.yml',
-      'config/queue.yml',
-      'config/recurring.yml',
-      'db/queue_schema.rb',
-      'db/cable_schema.rb',
-      'bin/jobs'
+      'app/javascript/controllers/hello_controller.js',
+      'config/environments/production.rb',
+      'config/environments/test.rb',
+      'lib',
+      'public',
+      'script'
     ]
 
     gereksiz_dosyalar.each do |dosya|
       # Mevcut olmayan klasör silme işlemi hata üretmesin
       FileUtils.rm_rf(dosya) if File.exist?(dosya) || Dir.exist?(dosya)
-    end
-
-    # Gemfile'dan gereksiz gem'leri kaldır (yorum satırı yap)
-    if File.exist?('Gemfile')
-      gemfile = File.read('Gemfile')
-      
-      # Solid queue, cable, cache satırlarını yorum yap
-      gemfile.gsub!(/^(gem ['"]solid_queue['"])/, '# \1  # Frontend için gerekli değil')
-      gemfile.gsub!(/^(gem ['"]solid_cable['"])/, '# \1  # Frontend için gerekli değil')
-      gemfile.gsub!(/^(gem ['"]solid_cache['"])/, '# \1  # Frontend için gerekli değil')
-      
-      File.write('Gemfile', gemfile)
     end
   end
 
