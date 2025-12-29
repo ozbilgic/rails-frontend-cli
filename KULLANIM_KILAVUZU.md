@@ -468,7 +468,7 @@ Levent Özbilgiç
 
 ## Lisans
 
-Bu araç MIT lisansı altında sunulmaktadır.
+GPLv3
 
 ---
 

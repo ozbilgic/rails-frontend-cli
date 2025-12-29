@@ -130,7 +130,7 @@ Levent Özbilgiç
 
 ## Lisans
 
-MIT
+GPLv3
 
 ## Katkıda Bulunun
 
