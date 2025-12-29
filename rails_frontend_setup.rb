@@ -168,13 +168,8 @@ class RailsFrontendCLI
       guncelle_routes('home', 'index', root: true)
       basari_mesaji("Routes yapılandırıldı")
 
-      # Adım 9 (veya 8): Tailwind yapılandırmasını güncelle
-      adim_goster(8 + adim_offset, "Tailwind yapılandırması güncelleniyor...")
-      guncelle_tailwind_config
-      basari_mesaji("Tailwind yapılandırması güncellendi")
-
-      # Adım 10 (veya 9): Procfile.dev yapılandır
-      adim_goster(9 + adim_offset, "Procfile.dev yapılandırılıyor...")
+      # Adım 9 (veya 8): Procfile.dev yapılandır
+      adim_goster(8 + adim_offset, "Procfile.dev yapılandırılıyor...")
       guncelle_procfile
       basari_mesaji("Procfile.dev yapılandırıldı")
     end
@@ -238,7 +233,7 @@ class RailsFrontendCLI
     end
 
     # Onay al
-    print "#{renklendir('Emin misiniz?', :sari)} '#{sayfa_adi_normalized}' sayfası silinecek (y/n): "
+    print "#{renklendir('Emin misiniz?', :sari)} '#{sayfa_adi_normalized}' sayfası silinecek (e/h): "
     onay = STDIN.gets.chomp.downcase
     unless onay == 'y' || onay == 'yes' || onay == 'e' || onay == 'evet'
       puts "İşlem iptal edildi."
@@ -326,9 +321,9 @@ class RailsFrontendCLI
         puts "  - #{dosya}"
       end
       puts "\n"
-      print renklendir("Yine de silmek istiyor musunuz? (y/n): ", :sari)
+      print renklendir("Yine de silmek istiyor musunuz? (e/h): ", :sari)
       cevap = STDIN.gets.chomp.downcase
-      unless cevap == 'y' || cevap == 'yes'
+      unless cevap == 'y' || cevap == 'yes' || cevap == 'e' || cevap == 'evet'
         puts "\nİşlem iptal edildi."
         exit 0
       end
@@ -433,9 +428,9 @@ class RailsFrontendCLI
     end
 
     # Onay iste
-    print renklendir("'#{layout_adi_normalized}' layout'unu silmek istediğinizden emin misiniz? (y/n): ", :sari)
+    print renklendir("'#{layout_adi_normalized}' layout'unu silmek istediğinizden emin misiniz? (e/h): ", :sari)
     cevap = STDIN.gets.chomp.downcase
-    unless cevap == 'y' || cevap == 'yes'
+    unless cevap == 'y' || cevap == 'yes' || cevap == 'e' || cevap == 'evet'
       puts "\nİşlem iptal edildi."
       exit 0
     end
@@ -508,9 +503,9 @@ class RailsFrontendCLI
         puts "  - #{dosya}"
       end
       puts "\n"
-      print renklendir("Yine de silmek istiyor musunuz? (y/n): ", :sari)
+      print renklendir("Yine de silmek istiyor musunuz? (e/h): ", :sari)
       cevap = STDIN.gets.chomp.downcase
-      unless cevap == 'y' || cevap == 'yes'
+      unless cevap == 'y' || cevap == 'yes' || cevap == 'e' || cevap == 'evet'
         puts "\nİşlem iptal edildi."
         exit 0
       end
@@ -549,7 +544,7 @@ class RailsFrontendCLI
     end
 
     unless File.exist?('bin/dev')
-      hata_mesaji("bin/dev dosyası bulunamadı! Bu proje Rails 8+ ile oluşturulmamış olabilir.")
+      hata_mesaji("bin/dev dosyası bulunamadı! Bu proje Rails 7+ ile oluşturulmamış olabilir.")
     end
 
     puts "\n#{renklendir('Rails server başlatılıyor...', :yesil, bold: true)}"
@@ -690,6 +685,7 @@ class RailsFrontendCLI
       # Solid queue, cable, cache satırlarını yorum yap
       gemfile.gsub!(/^(gem ['"]solid_queue['"])/, '# \1  # Frontend için gerekli değil')
       gemfile.gsub!(/^(gem ['"]solid_cable['"])/, '# \1  # Frontend için gerekli değil')
+      gemfile.gsub!(/^(gem ['"]solid_cache['"])/, '# \1  # Frontend için gerekli değil')
       
       File.write('Gemfile', gemfile)
     end
@@ -828,25 +824,6 @@ class RailsFrontendCLI
       }
     CSS
     File.write('app/assets/stylesheets/footer.css', footer_css)
-
-    # Application CSS'e import ekle
-    app_css_path = 'app/assets/stylesheets/application.tailwind.css'
-    if File.exist?(app_css_path)
-      app_css = File.read(app_css_path)
-      unless app_css.include?('@import "home.css"')
-        imports = <<~CSS
-
-          /* Sayfa CSS dosyaları */
-          @import "home.css";
-
-          /* Component CSS dosyaları */
-          @import "header.css";
-          @import "navbar.css";
-          @import "footer.css";
-        CSS
-        File.write(app_css_path, app_css + imports)
-      end
-    end
   end
 
   def olustur_stimulus_controller(sayfa_adi)
@@ -933,7 +910,7 @@ class RailsFrontendCLI
       end
     else
       # Normal route ekle (home controller kullan)
-      yeni_route = "  get '/#{sayfa_adi}', to: 'home##{action}'\n"
+      yeni_route = "  get \"/#{sayfa_adi}\", to: \"home##{action}\"\n"
       
       # Route zaten varsa ekleme
       unless routes_content.include?(yeni_route.strip)
@@ -954,21 +931,6 @@ class RailsFrontendCLI
     routes_content.gsub!(/^\s*get\s+['"]\/#{sayfa_adi}['"].*\n/, '')
 
     File.write(routes_path, routes_content)
-  end
-
-  def guncelle_tailwind_config
-    config_path = 'config/tailwind.config.js'
-    return unless File.exist?(config_path)
-
-    config_content = File.read(config_path)
-
-    # Shared klasörünü content'e ekle
-    unless config_content.include?("'./app/views/shared/**/*.html.erb'")
-      config_content.gsub!(/content: \[/) do |match|
-        "#{match}\n    './app/views/shared/**/*.html.erb',"
-      end
-      File.write(config_path, config_content)
-    end
   end
 
   def olustur_controller(sayfa_adi)
@@ -1011,25 +973,6 @@ class RailsFrontendCLI
     CSS
 
     File.write("app/assets/stylesheets/#{sayfa_adi}.css", css_content)
-
-    # Application CSS'e import ekle
-    app_css_path = 'app/assets/stylesheets/application.tailwind.css'
-    if File.exist?(app_css_path)
-      app_css = File.read(app_css_path)
-      import_line = "@import \"#{sayfa_adi}.css\";"
-      
-      unless app_css.include?(import_line)
-        # Sayfa CSS dosyaları bölümüne ekle
-        if app_css.include?('/* Sayfa CSS dosyaları */')
-          app_css.gsub!(/\/\* Sayfa CSS dosyaları \*\/\n/) do |match|
-            "#{match}#{import_line}\n"
-          end
-        else
-          app_css += "\n#{import_line}\n"
-        end
-        File.write(app_css_path, app_css)
-      end
-    end
   end
 
   def guncelle_procfile
@@ -1071,7 +1014,9 @@ class RailsFrontendCLI
         </head>
 
         <body>
-          <%= yield %>
+          <main>
+            <%= yield %>
+          </main>
         </body>
       </html>
     HTML
@@ -1189,10 +1134,8 @@ class RailsFrontendCLI
     puts "  1. cd #{@proje_adi}"
     puts "  2. rails-frontend run"
     puts "  3. Tarayıcıda http://localhost:3000 adresini açın"
-    puts "\n#{renklendir('Yeni sayfa eklemek için:', :mavi)}"
-    puts "  rails-frontend add-page SAYFA_ADI"
-    puts "\n#{renklendir('Sayfa silmek için:', :mavi)}"
-    puts "  rails-frontend remove-page SAYFA_ADI"
+    puts "\n#{renklendir('Yardım için:', :mavi)}"
+    puts "  rails-frontend --help"
     puts ""
   end
 
@@ -1245,13 +1188,11 @@ class RailsFrontendCLI
         
       Sayfa ekle:
         rails-frontend add-page hakkımızda
-        rails-frontend add-page iletişim
         
       Layout ekle:
         rails-frontend add-layout iletisim
         
       JavaScript kütüphanesi ekle:
-        rails-frontend add-pin alpinejs
         rails-frontend add-pin sweetalert2
         
       Stimulus controller ekle:
@@ -1260,17 +1201,6 @@ class RailsFrontendCLI
       Server başlat:
         rails-frontend run
     ORNEKLER
-    
-    puts renklendir("ÖZELLİKLER:", :sari, bold: true)
-    puts "  ✅ Rails 7+ ile uyumlu"
-    puts "  ✅ Tailwind CSS otomatik yapılandırma"
-    puts "  ✅ Stimulus controller desteği"
-    puts "  ✅ Layout yönetimi"
-    puts "  ✅ Harici JavaScript kütüphanesi yönetimi"
-    puts "  ✅ Shared componentler (header, navbar, footer)"
-    puts "  ✅ Otomatik route yapılandırması"
-    puts "  ✅ Türkçe karakter desteği"
-    puts ""
     
     puts renklendir("DAHA FAZLA BİLGİ:", :mavi)
     puts "  Detaylı kullanım kılavuzu: KULLANIM_KILAVUZU.md"
