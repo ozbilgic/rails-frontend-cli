@@ -112,6 +112,7 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 | `rails-frontend remove-pin PAKET` | `unpin` | Harici javascript kütüphanesi sil |
 | `rails-frontend update` | `u` | CLI'yi güncelle |
 | `rails-frontend run` | `r` | Server başlat |
+| `rails-frontend build` | `b` | Statik site oluştur |
 | `rails-frontend version` | `-v` | Versiyon göster |
 | `rails-frontend help` | `-h` | Yardım göster |
 
@@ -131,8 +132,3 @@ Levent Özbilgiç
 ## Lisans
 
 GPLv3
-
-## Katkıda Bulunun
-
-build dalında rails-frontend build komutu ile tüm projeyi statik html,css,js'e çevirip kaydedecek bir komut
-üzerinde çalışıyorum. Bu konuda katkıda bulunmak isteyenler benimle iletişime geçebilirler.

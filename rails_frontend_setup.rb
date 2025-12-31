@@ -5,7 +5,7 @@ require 'fileutils'
 require 'optparse'
 
 class RailsFrontendCLI
-  VERSION  = "1.0.3"
+  VERSION  = "1.0.4"
   AUTHOR   = "Levent Özbilgiç"
   LINKEDIN = "https://www.linkedin.com/in/leventozbilgic/"
   GITHUB   = "https://github.com/ozbilgic"
@@ -84,6 +84,8 @@ class RailsFrontendCLI
       pin_sil
     when 'run', 'r'
       server_calistir
+    when 'build', 'b'
+      build_statik_site
     when 'update', 'u'
       cli_guncelle
     when 'version', '-v', '--version'
@@ -588,6 +590,179 @@ class RailsFrontendCLI
         puts ""
         hata_mesaji("Güncelleme başarısız oldu!\n#{output}")
       end
+    end
+  end
+
+  def build_statik_site
+    rails_projesi_mi?
+    baslik_goster("Statik Dosyalar Oluşturuluyor")
+
+    # 1. Server kontrolü
+    adim_goster(1, "Server kontrolü...")  
+    server = server_kontrol_et
+    unless server[:calisiyormu]
+      hata_mesaji("Rails server çalışmıyor! Önce 'rails-frontend run' ile başlatın.")
+    end
+    basari_mesaji("Server çalışıyor")
+     
+    # 2. Wget ile mirror
+    wget_mirror(server[:port])
+
+    # 3. Build klasörü hazırlama
+    adim_goster(3, "Build klasörü hazırlanıyor...")  
+    build_yapilandir
+    basari_mesaji("Build klasörü hazırlandı")
+    
+    # 4. Dosyaları taşı
+    adim_goster(4, "Dosyalar organize ediliyor...")
+    tasi_assets_dosyalari
+    basari_mesaji("Dosyalar organize edildi")
+    
+    # # 5. Path düzeltmeleri
+    adim_goster(5, "Path düzeltmeleri yapılıyor...")
+    duzelt_html_pathleri(server[:port])
+    duzelt_css_pathleri
+    basari_mesaji("Path düzeltmeleri tamamlandı")
+    
+    # 6. Temizlik
+    adim_goster(6, "Gerekli olmayan bileşenler kaldırılıyor...")
+    temizle_html_dosyalari
+    basari_mesaji("Gerekli olmayan bileşenler kaldırıldı")
+    
+    puts "\n#{renklendir('✓ Statik site başarıyla oluşturuldu!', :yesil)}"
+    puts "Klasör: #{renklendir('build/', :mavi)}"
+    puts "\nTest etmek için:"
+    puts "  cd build && npx http-server -p 8000"
+  end
+
+  # Build helper metodları
+  def server_kontrol_et
+    pid_file = 'tmp/pids/server.pid'
+    return { calisiyormu: false, port: nil } unless File.exist?(pid_file)
+
+    pid = File.read(pid_file).strip.to_i
+
+    begin
+      # Port numarasını bul
+      cmd = `ps -p #{pid} -o args=`.strip
+      port = cmd[/tcp:\/\/[^:]+:(\d+)/, 1]
+
+      { calisiyormu: true, port: port.to_i }
+    rescue Errno::ESRCH, Errno::EPERM
+      # Process bulunamadı veya erişim yok
+      { calisiyormu: false, port: nil }
+    end
+  end
+
+  def wget_mirror(port)
+    # önceki build klasörünü sil
+    FileUtils.rm_rf('build')
+
+    # wget'i sessizce çalıştır
+    system("wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --directory-prefix=build http://localhost:#{port}/ > /dev/null 2>&1")
+    
+    # localhost:3000 klasörünü build/ içine taşı
+    if Dir.exist?("build/localhost:#{port}")
+      Dir.glob("build/localhost:#{port}/*").each do |file|
+        FileUtils.mv(file, 'build/')
+      end
+      FileUtils.rm_rf("build/localhost:#{port}")
+    end
+  end
+
+  def build_yapilandir
+    ['img', 'js', 'css', 'fonts'].each do |dir|
+      FileUtils.mkdir_p("build/assets/#{dir}")
+    end
+  end
+
+  def tasi_assets_dosyalari
+    uzantilar = [ "{jpg,jpeg,png,gif,svg,webp,ico}", "js", "css", "{woff,woff2,ttf,eot,otf}" ]
+    dosyalar = [ "img", "js", "css", "fonts" ]
+
+    uzantilar.zip(dosyalar).each do |uzanti, klasor|
+      Dir.glob("build/**/*.#{uzanti}").each do |file|
+        basename = File.basename(file)
+        dest = "build/assets/#{klasor}/#{basename}"
+
+        # Dosya varsa ve hedef yoksa taşı
+        if File.exist?(file) && !File.exist?(dest)
+          FileUtils.mv(file, dest)
+        end
+      end
+    end
+
+    # controllers klasörü varsa içindekileri taşı ve sil
+    if Dir.exist?("build/assets/controllers")
+      Dir.glob("build/assets/controllers/*").each do |file|
+        FileUtils.mv(file, 'build/assets/js/')
+      end
+      FileUtils.rm_rf("build/assets/controllers")
+    end
+
+    # turbo dosyalarını sil (bu dosya stimulus için gerekli olabilir şimdilik yoruma aldım)
+    # Dir.glob('**/*turbo.min*').each do |file|
+    #   FileUtils.rm_rf(file)
+    # end
+  end
+
+  def duzelt_html_pathleri(port)
+    Dir.glob('build/**/*.html').each do |file|
+      content = File.read(file)
+      
+      # 1. "assets/" içeren ve .js ile biten satırlara "assets/" den sonra "js/" ekle
+      # Örnek: assets/application-bfcdf840.js -> assets/js/application-bfcdf840.js
+      content.gsub!(/assets\/([^\/\s"']+\.js)/, 'assets/js/\1')
+      
+      # 2. "assets/controllers/" içeren ve .js ile biten satırlara "assets/controllers/" den sonra "js/" ekle
+      # Örnek: assets/controllers/index-ee64e1f1.js -> assets/js/index-ee64e1f1.js
+      content.gsub!(/assets\/controllers\/([^\/\s"']+\.js)/, 'assets/js/\1')
+      
+      # 3. "assets/" içeren ve .css ile biten satırlara "assets/" den sonra "css/" ekle
+      # Örnek: assets/application-72587725.css -> assets/css/application-72587725.css
+      content.gsub!(/assets\/([^\/\s"']+\.css)/, 'assets/css/\1')
+
+      # 4. "assets/" içeren ve .jpg|jpeg|png|gif|svg|webp ile biten satırlara "assets/" den sonra "img/" ekle
+      # Örnek: assets/app-image-72587725.jpg -> assets/img/app-image-72587725.jpg
+      content.gsub!(/assets\/([^\/\s"']+\.(jpg|jpeg|png|gif|svg|webp))/, 'assets/img/\1')
+      content.gsub!(/http:\/\/localhost:#{port}\/([^\/\s"']+\.(jpg|jpeg|png|gif|svg|webp))/, 'assets/img/\1')
+      
+      File.write(file, content)
+    end
+  end
+
+  def duzelt_css_pathleri
+    Dir.glob('build/assets/css/**/*.css').each do |file|
+      content = File.read(file)
+      
+      # Font paths - absolute path kullan
+      # Örnek: url("LavishlyYours-Regular-c6da7860.ttf") -> url("/assets/fonts/LavishlyYours-Regular-c6da7860.ttf")
+      content.gsub!(/url\(["']?([^\/][^"'()]*\.(woff2?|ttf|eot|otf))["']?\)/, 'url("/assets/fonts/\1")')
+      
+      # Image paths - absolute path kullan
+      # Örnek: url("A-13904566-1761601378-8017-2b819c09.jpg") -> url("/assets/img/A-13904566-1761601378-8017-2b819c09.jpg")
+      content.gsub!(/url\(["']?([^\/][^"'()]*\.(jpg|jpeg|png|gif|svg|webp))["']?\)/, 'url("/assets/img/\1")')
+      
+      File.write(file, content)
+    end
+  end
+
+  def temizle_html_dosyalari
+    Dir.glob('build/**/*.html').each do |file|
+      content = File.read(file)
+      
+      # index.html linkleri
+      content.gsub!(/href="[^"]*\/index\.html"/, 'href="/"')
+      content.gsub!(/href="index\.html"/, 'href="/"')
+      
+      # Turbo kaldır (bu dosya stimulus için gerekli olabilir şimdilik yoruma aldım)
+      # content.gsub!(/^.*turbo\.min.*$\n?/, '')
+      
+      # CSRF kaldır
+      content.gsub!(/<meta name="csrf-param"[^>]*>/, '')
+      content.gsub!(/<meta name="csrf-token"[^>]*>/, '')
+      
+      File.write(file, content)
     end
   end
 
@@ -1121,6 +1296,7 @@ class RailsFrontendCLI
     puts <<~KOMUTLAR
       Proje Yönetimi:
         new, n PROJE_ADI [--clean]  Yeni Rails frontend projesi oluştur
+        build, b                    Statik site oluştur
         run, r                      Server başlat (bin/dev)
         
       Sayfa Yönetimi:

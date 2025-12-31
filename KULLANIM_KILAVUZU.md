@@ -32,6 +32,7 @@ source ~/.bashrc
 ### Kurulumu Test Et
 
 ```bash
+# Yeni versiyon bilgisi için:
 rails-frontend --version
 # veya
 rails-frontend version
@@ -108,6 +109,47 @@ rails-frontend run
 ```
 
 Bu komut `bin/dev` dosyasını çalıştırarak Rails server'ı başlatır.
+
+### Statik Site Oluşturma
+
+```bash
+rails-frontend build
+# veya kısa isim
+rails-frontend b
+```
+
+**Nasıl Çalışır:**
+1. Rails server'ın çalıştığını kontrol eder
+2. `build/` klasörü varsa temizler ve yeniden hazırlar
+3. `build/assets/{img,js,css,fonts}` klasörlerini oluşturur
+4. Tüm dosyaları organize eder (image, js, css, font)
+5. HTML ve CSS dosyalarında path'leri düzeltir
+6. HTML dosyalarını temizler (csrf, index.html linkleri)
+
+**Önemli:** Bu komut çalıştırılmadan önce Rails server başlatılmış olmalıdır!
+
+**Örnek Kullanım:**
+```bash
+# Terminal 1 - Server başlat
+rails-frontend run
+
+# Terminal 2 - Build oluştur
+rails-frontend build
+
+# Build klasörünü test et
+cd build && npx http-server -p 8000
+```
+
+**Oluşturulan Klasör Yapısı:**
+```
+build/
+├── assets/
+│   ├── img/          # Tüm image dosyaları
+│   ├── js/           # Tüm JavaScript dosyaları
+│   ├── css/          # Tüm CSS dosyaları
+│   └── fonts/        # Tüm font dosyaları
+└── *.html            # HTML sayfaları
+```
 
 ### Sayfa Silme
 
@@ -370,6 +412,7 @@ Dilediğiniz gibi düzenleyebilirsiniz.
 | Komut | Kısa İsim | Açıklama |
 |-------|-----------|----------|
 | `rails-frontend new PROJE [--clean]` | `n` | Yeni proje oluştur |
+| `rails-frontend build` | `b` | Statik site oluştur |
 | `rails-frontend add-page SAYFA` | `ap` | Sayfa ekle |
 | `rails-frontend remove-page SAYFA` | `rp` | Sayfa sil |
 | `rails-frontend add-stimulus CONTROLLER` | `as` | Stimulus controller ekle |

@@ -1,5 +1,36 @@
 # Versiyon Geçmişi
 
+## v1.0.4
+
+### Yeni Özellikler
+- **Statik Site Oluşturma:**
+  - `rails-frontend build` komutu eklendi (kısa: `b`)
+  - Asset organizasyonu (img, js, css, fonts klasörleri)
+  - Otomatik path düzeltmeleri (HTML ve CSS)
+  - HTML temizliği (csrf, index.html linkleri)
+  - Statik hosting için hazır çıktı
+
+### Geliştirmeler
+- Server kontrolü (build işlemine başlamadan sunucu ve port tespiti yapılır)
+- Asset klasör yapısı: `build/assets/{img,js,css,fonts}/`
+- HTML dosyalarında path düzeltmeleri:
+  - `assets/application.js` → `assets/js/application.js`
+  - `assets/controllers/index.js` → `assets/js/index.js`
+  - `assets/application.css` → `assets/css/application.css`
+- CSS dosyalarında absolute path kullanımı:
+  - Font: `url("font.woff2")` → `url("/assets/fonts/font.woff2")`
+  - Image: `url("image.jpg")` → `url("/assets/img/image.jpg")`
+- CSRF temizliği
+- index.html link düzeltmeleri
+
+### Dokümantasyon
+- README.md güncellendi
+- KULLANIM_KILAVUZU.md'ye statik site oluşturma bölümü eklendi
+- Yardım mesajı güncellendi
+- Komut referansı tabloları güncellendi
+
+---
+
 ## v1.0.3
 
 ### Yeni Özellikler
