@@ -629,7 +629,7 @@ class RailsFrontendCLI
     puts "\n#{renklendir('✓ Statik site başarıyla oluşturuldu!', :yesil)}"
     puts "Klasör: #{renklendir('build/', :mavi)}"
     puts "\nTest etmek için:"
-    puts "  cd build && npx http-server -p 8000"
+    puts "  cd build && python3 -m http.server 8000 veya npx http-server -p 8000"
   end
 
   # Build helper metodları
@@ -848,6 +848,24 @@ class RailsFrontendCLI
     normalized.gsub(/[^a-z0-9_]/, '_')
   end
 
+  def uygulama_ismi_al
+    # config/application.rb dosyasından uygulama ismini oku
+    app_config_path = 'config/application.rb'
+    if File.exist?(app_config_path)
+      content = File.read(app_config_path)
+      # "module UygulamaIsmi" pattern'ini ara
+      match = content.match(/module\s+([A-Z][a-zA-Z0-9_]*)/)
+      if match
+        # CamelCase'i başlık haline çevir (örn: MyApp -> My App)
+        return match[1].gsub(/([A-Z]+)([A-Z][a-z])/, '\1 \2')
+                      .gsub(/([a-z\d])([A-Z])/, '\1 \2')
+      end
+    end
+    
+    # Fallback: Mevcut dizin ismini kullan
+    File.basename(Dir.pwd).split('_').map(&:capitalize).join(' ')
+  end
+
   def olustur_home_controller
     controller_content = <<~RUBY
       class HomeController < ApplicationController
@@ -1006,6 +1024,16 @@ class RailsFrontendCLI
 
     layout_content = File.read(layout_path)
 
+    # UTF-8 charset meta tag'ini ekle (eğer yoksa)
+    if !layout_content.match?(/<meta\s+charset\s*=\s*["']utf-8["']/i)
+      layout_content.gsub!(/<\/title>/) do
+        <<~HTML.chomp
+          </title>
+              <meta charset="utf-8">
+        HTML
+      end
+    end
+
     # Önce mevcut main tag'lerini temizle
     layout_content.gsub!(/<main[^>]*>/, '')
     layout_content.gsub!(/<\/main>/, '')
@@ -1146,11 +1174,14 @@ class RailsFrontendCLI
       <!DOCTYPE html>
       <html>
         <head>
-          <title>#{layout_adi.capitalize}</title>
+          <title><%= content_for(:title) || #{layout_adi.capitalize} %></title>
+          <meta charset="utf-8">
           <meta name="viewport" content="width=device-width,initial-scale=1">
-          <%= csrf_meta_tags %>
-          <%= csp_meta_tag %>
-          <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+          <meta name="apple-mobile-web-app-capable" content="yes">
+          <meta name="application-name" content="#{uygulama_ismi_al}">
+          <meta name="mobile-web-app-capable" content="yes">
+          <%= yield :head %>
+          <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
           <%= javascript_importmap_tags %>
         </head>
 
