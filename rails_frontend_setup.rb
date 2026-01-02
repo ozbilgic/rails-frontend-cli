@@ -109,8 +109,8 @@ class RailsFrontendCLI
       hata_mesaji("'#{@proje_adi}' dizini zaten mevcut!")
     end
 
-    # Adım 1: Rails projesi oluştur
-    adim_goster(1, "Rails projesi oluşturuluyor...")
+    # Rails projesi oluştur
+    mesaj_goster("Rails projesi oluşturuluyor...")
     
     # Clean mode'a göre komut oluştur
     if @clean_mode
@@ -131,48 +131,45 @@ class RailsFrontendCLI
     # Proje dizinine geç
     proje_dizini = File.expand_path(@proje_adi)
     Dir.chdir(proje_dizini) do
-      # Adım 2: Gereksiz dosyaları temizle (eğer --clean parametresi varsa)
+      # Gereksiz dosyaları temizle (eğer --clean parametresi varsa)
       if @clean_mode
-        adim_goster(2, "Gereksiz dosyalar temizleniyor...")
+        mesaj_goster("Gereksiz dosyalar temizleniyor...")
         temizle_gereksiz_dosyalar
         basari_mesaji("Gereksiz dosyalar temizlendi")
-        adim_offset = 1
-      else
-        adim_offset = 0
       end
 
-      # Adım 3 (veya 2): Home controller ve view oluştur
-      adim_goster(2 + adim_offset, "Home controller ve view oluşturuluyor...")
+      # Home controller ve view oluştur
+      mesaj_goster("Home controller ve view oluşturuluyor...")
       olustur_home_controller
       basari_mesaji("Home controller ve view oluşturuldu")
 
-      # Adım 4 (veya 3): Shared componentler oluştur
-      adim_goster(3 + adim_offset, "Shared componentler oluşturuluyor...")
+      # Shared componentler oluştur
+      mesaj_goster("Shared componentler oluşturuluyor...")
       olustur_shared_componentler
       basari_mesaji("Shared componentler oluşturuldu")
 
-      # Adım 5 (veya 4): CSS dosyaları oluştur
-      adim_goster(4 + adim_offset, "CSS dosyaları oluşturuluyor...")
+      # CSS dosyaları oluştur
+      mesaj_goster("CSS dosyaları oluşturuluyor...")
       olustur_css_dosyalari
       basari_mesaji("CSS dosyaları oluşturuldu")
 
-      # Adım 6 (veya 5): Asset klasörleri oluştur
-      adim_goster(5 + adim_offset, "Asset klasörleri oluşturuluyor...")
+      # Asset klasörleri oluştur
+      mesaj_goster("Asset klasörleri oluşturuluyor...")
       olustur_asset_klasorleri
       basari_mesaji("Asset klasörleri oluşturuldu")
 
-      # Adım 7 (veya 6): Layout dosyasını güncelle
-      adim_goster(6 + adim_offset, "Layout dosyası güncelleniyor...")
+      # Layout dosyasını güncelle
+      mesaj_goster("Layout dosyası güncelleniyor...")
       guncelle_layout
       basari_mesaji("Layout dosyası güncellendi")
 
-      # Adım 8 (veya 7): Routes yapılandır
-      adim_goster(7 + adim_offset, "Routes yapılandırılıyor...")
+      # Routes yapılandır
+      mesaj_goster("Routes yapılandırılıyor...")
       guncelle_routes('home', 'index', root: true)
       basari_mesaji("Routes yapılandırıldı")
 
-      # Adım 9 (veya 8): Procfile.dev yapılandır
-      adim_goster(8 + adim_offset, "Procfile.dev yapılandırılıyor...")
+      # Procfile.dev yapılandır
+      mesaj_goster("Procfile.dev yapılandırılıyor...")
       guncelle_procfile
       basari_mesaji("Procfile.dev yapılandırıldı")
     end
@@ -189,23 +186,23 @@ class RailsFrontendCLI
     # Sayfa adını normalize et (türkçe karakterleri değiştir)
     sayfa_adi_normalized = normalize_isim(@sayfa_adi)
 
-    # Adım 1: View oluştur (home klasöründe)
-    adim_goster(1, "View dosyası oluşturuluyor...")
+    # View oluştur (home klasöründe)
+    mesaj_goster("View dosyası oluşturuluyor...")
     olustur_view(sayfa_adi_normalized)
     basari_mesaji("View dosyası oluşturuldu")
 
-    # Adım 2: CSS dosyası oluştur
-    adim_goster(2, "CSS dosyası oluşturuluyor...")
+    # CSS dosyası oluştur
+    mesaj_goster("CSS dosyası oluşturuluyor...")
     olustur_css(sayfa_adi_normalized)
     basari_mesaji("CSS dosyası oluşturuldu")
 
-    # Adım 3: Home controller'a action ekle
-    adim_goster(3, "Home controller güncelleniyor...")
+    # Home controller'a action ekle
+    mesaj_goster("Home controller güncelleniyor...")
     home_controller_action_ekle(sayfa_adi_normalized)
     basari_mesaji("Home controller güncellendi")
 
-    # Adım 4: Route ekle
-    adim_goster(4, "Route ekleniyor...")
+    # Route ekle
+    mesaj_goster("Route ekleniyor...")
     guncelle_routes(sayfa_adi_normalized, sayfa_adi_normalized)
     basari_mesaji("Route eklendi")
 
@@ -239,23 +236,23 @@ class RailsFrontendCLI
       exit 0
     end
 
-    # Adım 1: View dosyasını sil
-    adim_goster(1, "View dosyası siliniyor...")
+    # View dosyasını sil
+    mesaj_goster("View dosyası siliniyor...")
     FileUtils.rm_f(view_path)
     basari_mesaji("View dosyası silindi")
 
-    # Adım 2: CSS dosyasını sil
-    adim_goster(2, "CSS dosyası siliniyor...")
+    # CSS dosyasını sil
+    mesaj_goster("CSS dosyası siliniyor...")
     FileUtils.rm_f("app/assets/stylesheets/#{sayfa_adi_normalized}.css")
     basari_mesaji("CSS dosyası silindi")
 
-    # Adım 3: Home controller'dan action'ı kaldır
-    adim_goster(3, "Home controller güncelleniyor...")
+    # Home controller'dan action'ı kaldır
+    mesaj_goster("Home controller güncelleniyor...")
     home_controller_action_kaldir(sayfa_adi_normalized)
     basari_mesaji("Home controller güncellendi")
 
-    # Adım 4: Route'u kaldır
-    adim_goster(4, "Route kaldırılıyor...")
+    # Route'u kaldır
+    mesaj_goster("Route kaldırılıyor...")
     kaldir_route(sayfa_adi_normalized)
     basari_mesaji("Route kaldırıldı")
 
@@ -272,7 +269,7 @@ class RailsFrontendCLI
     controller_adi_normalized = normalize_isim(@controller_adi)
 
     # Stimulus controller oluştur
-    adim_goster(1, "Stimulus controller oluşturuluyor...")
+    mesaj_goster("Stimulus controller oluşturuluyor...")
     olustur_stimulus_controller(controller_adi_normalized)
     basari_mesaji("Stimulus controller oluşturuldu")
 
@@ -296,7 +293,7 @@ class RailsFrontendCLI
     end
 
     # View dosyalarında kullanım kontrolü
-    adim_goster(1, "View dosyalarında kullanım kontrol ediliyor...")
+    mesaj_goster("View dosyalarında kullanım kontrol ediliyor...")
     kullanilan_dosyalar = []
     
     if Dir.exist?('app/views')
@@ -326,7 +323,7 @@ class RailsFrontendCLI
     basari_mesaji("Kontrol tamamlandı")
 
     # Controller'ı sil
-    adim_goster(2, "Stimulus controller siliniyor...")
+    mesaj_goster("Stimulus controller siliniyor...")
     FileUtils.rm_f(controller_file)
     basari_mesaji("Stimulus controller silindi")
 
@@ -349,7 +346,7 @@ class RailsFrontendCLI
     end
 
     # app/views/home klasöründeki dosyaları tara
-    adim_goster(1, "View dosyaları taranıyor...")
+    mesaj_goster("View dosyaları taranıyor...")
     home_views = home_views_listele
     basari_mesaji("View dosyaları tarandı")
 
@@ -380,7 +377,7 @@ class RailsFrontendCLI
     end
 
     # Aynı view için mevcut layout kontrolü
-    adim_goster(2, "Mevcut layout kontrol ediliyor...")
+    mesaj_goster("Mevcut layout kontrol ediliyor...")
     mevcut_layout = view_icin_mevcut_layout_bul(view_adi)
     if mevcut_layout
       basari_mesaji("Kontrol tamamlandı")
@@ -389,12 +386,12 @@ class RailsFrontendCLI
     basari_mesaji("Kontrol tamamlandı")
 
     # Layout dosyası oluştur
-    adim_goster(3, "Layout dosyası oluşturuluyor...")
+    mesaj_goster("Layout dosyası oluşturuluyor...")
     olustur_layout_dosyasi(layout_adi_normalized)
     basari_mesaji("Layout dosyası oluşturuldu")
 
     # Controller'a layout direktifi ekle
-    adim_goster(4, "Home controller güncelleniyor...")
+    mesaj_goster("Home controller güncelleniyor...")
     layout_direktifi_ekle(layout_adi_normalized, view_adi)
     basari_mesaji("Home controller güncellendi")
 
@@ -427,12 +424,12 @@ class RailsFrontendCLI
     end
 
     # Controller'dan layout direktifini kaldır
-    adim_goster(1, "Home controller güncelleniyor...")
+    mesaj_goster("Home controller güncelleniyor...")
     layout_direktifi_kaldir(layout_adi_normalized)
     basari_mesaji("Home controller güncellendi")
 
     # Layout dosyasını sil
-    adim_goster(2, "Layout dosyası siliniyor...")
+    mesaj_goster("Layout dosyası siliniyor...")
     FileUtils.rm_f(layout_file)
     basari_mesaji("Layout dosyası silindi")
 
@@ -451,7 +448,7 @@ class RailsFrontendCLI
     end
 
     # bin/importmap pin komutunu çalıştır
-    adim_goster(1, "Pin ekleniyor...")
+    mesaj_goster("Pin ekleniyor...")
     output = `bin/importmap pin #{@pin_adi} 2>&1`
     
     # Çıktıda hata kontrolü
@@ -479,7 +476,7 @@ class RailsFrontendCLI
     end
 
     # JavaScript ve HTML dosyalarında kullanım kontrolü
-    adim_goster(1, "Kullanım kontrol ediliyor...")
+    mesaj_goster("Kullanım kontrol ediliyor...")
     kullanilan_dosyalar = pin_kullanim_kontrol(@pin_adi)
     basari_mesaji("Kontrol tamamlandı")
 
@@ -499,7 +496,7 @@ class RailsFrontendCLI
     end
 
     # Pin'in varlığını kontrol et
-    adim_goster(2, "Pin kontrol ediliyor...")
+    mesaj_goster("Pin kontrol ediliyor...")
     importmap_file = 'config/importmap.rb'
     unless File.exist?(importmap_file)
       hata_mesaji("config/importmap.rb bulunamadı!")
@@ -513,7 +510,7 @@ class RailsFrontendCLI
     basari_mesaji("Pin bulundu")
 
     # bin/importmap unpin komutunu çalıştır
-    adim_goster(3, "Pin siliniyor...")
+    mesaj_goster("Pin siliniyor...")
     output = `bin/importmap unpin #{@pin_adi} 2>&1`
     basari_mesaji("Pin silindi")
 
@@ -554,14 +551,14 @@ class RailsFrontendCLI
     puts ""
     
     # Mevcut branch'i kontrol et
-    adim_goster(1, "Git durumu kontrol ediliyor...")
+    mesaj_goster("Git durumu kontrol ediliyor...")
     Dir.chdir(cli_path) do
       current_branch = `git rev-parse --abbrev-ref HEAD`.strip
       puts "Mevcut branch: #{renklendir(current_branch, :mavi)}"
       basari_mesaji("Kontrol tamamlandı")
       
       # Güncellemeleri kontrol et
-      adim_goster(2, "Güncellemeler kontrol ediliyor...")
+      mesaj_goster("Güncellemeler kontrol ediliyor...")
       system("git fetch origin #{current_branch} 2>&1 > /dev/null")
       
       local_commit = `git rev-parse HEAD`.strip
@@ -577,7 +574,7 @@ class RailsFrontendCLI
       basari_mesaji("Yeni güncelleme bulundu")
       
       # Güncelleme yap
-      adim_goster(3, "Güncelleme yapılıyor...")
+      mesaj_goster("Güncelleme yapılıyor...")
       output = `git pull origin #{current_branch} 2>&1`
       
       if $?.success?
@@ -597,35 +594,35 @@ class RailsFrontendCLI
     rails_projesi_mi?
     baslik_goster("Statik Dosyalar Oluşturuluyor")
 
-    # 1. Server kontrolü
-    adim_goster(1, "Server kontrolü...")  
+    # Server kontrolü
+    mesaj_goster("Server kontrolü...")  
     server = server_kontrol_et
     unless server[:calisiyormu]
       hata_mesaji("Rails server çalışmıyor! Önce 'rails-frontend run' ile başlatın.")
     end
     basari_mesaji("Server çalışıyor")
      
-    # 2. Wget ile mirror
+    # Wget ile mirror
     wget_mirror(server[:port])
 
-    # 3. Build klasörü hazırlama
-    adim_goster(3, "Build klasörü hazırlanıyor...")  
+    # Build klasörü hazırlama
+    mesaj_goster("Build klasörü hazırlanıyor...")  
     build_yapilandir
     basari_mesaji("Build klasörü hazırlandı")
     
-    # 4. Dosyaları taşı
-    adim_goster(4, "Dosyalar organize ediliyor...")
+    # Dosyaları taşı
+    mesaj_goster("Dosyalar organize ediliyor...")
     tasi_assets_dosyalari
     basari_mesaji("Dosyalar organize edildi")
     
-    # # 5. Path düzeltmeleri
-    adim_goster(5, "Path düzeltmeleri yapılıyor...")
+    # Path düzeltmeleri
+    mesaj_goster("Path düzeltmeleri yapılıyor...")
     duzelt_html_pathleri(server[:port])
     duzelt_css_pathleri
     basari_mesaji("Path düzeltmeleri tamamlandı")
     
-    # 6. Temizlik
-    adim_goster(6, "Gerekli olmayan bileşenler kaldırılıyor...")
+    # Temizlik
+    mesaj_goster("Gerekli olmayan bileşenler kaldırılıyor...")
     temizle_html_dosyalari
     basari_mesaji("Gerekli olmayan bileşenler kaldırıldı")
     
@@ -1258,7 +1255,7 @@ class RailsFrontendCLI
     puts renklendir(mesaj, :mavi, bold: true)
   end
 
-  def adim_goster(numara, mesaj)
+  def mesaj_goster(mesaj)
     # Sadece mesajı göster, numara gösterme
     print "  #{mesaj} "
   end
