@@ -1192,7 +1192,7 @@ class RailsFrontendCLI
       <!DOCTYPE html>
       <html>
         <head>
-          <title><%= content_for(:title) || #{layout_adi.capitalize} %></title>
+          <title><%= content_for(:title) || "#{layout_adi.capitalize}" %></title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width,initial-scale=1">
           <meta name="apple-mobile-web-app-capable" content="yes">
