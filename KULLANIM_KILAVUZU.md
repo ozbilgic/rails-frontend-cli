@@ -6,27 +6,41 @@ Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukç
 
 📚 [Eğitim materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
 
-## Kurulum
+### Kurulum
 
-### Otomatik Kurulum (Önerilen)
+**Tek Komutla Kurulum (Önerilen):**
 
 ```bash
-git clone https://github.com/ozbilgic/rails-frontend-cli.git
-cd rails-frontend-cli
-./install.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/ozbilgic/rails-frontend-cli/main/install.sh)
+```
+
+Kurulum tamamlandıktan sonra shell'i yeniden yükleyin:
+
+```bash
 source ~/.bashrc  # veya source ~/.zshrc
 ```
 
-### Manuel Kurulum
+**Manuel Kurulum:**
+
+Eğer curl kullanamıyorsanız:
 
 ```bash
-git clone https://github.com/ozbilgic/rails-frontend-cli.git
-cd rails-frontend-cli
-chmod +x rails-frontend rails-frontend rails_frontend_setup.rb
+# Repository'yi klonlayın
+git clone https://github.com/ozbilgic/rails-frontend-cli.git ~/.rails-frontend-cli
 
-# PATH'e ekleyin (~/.bashrc veya ~/.zshrc)
-export PATH="$PATH:$(pwd)"
-source ~/.bashrc
+# Kurulum scriptini çalıştırın
+cd ~/.rails-frontend-cli
+./install.sh
+```
+
+### Kaldırma
+
+```bash
+# Kurulumu kaldırın
+rm -rf ~/.rails-frontend-cli
+
+# Shell yapılandırmasından PATH'i kaldırın (~/.bashrc veya ~/.zshrc)
+# "# Rails Frontend CLI" satırını ve altındaki export satırını silin
 ```
 
 ### Kurulumu Test Et
@@ -68,6 +82,9 @@ Tarayıcıda `http://localhost:3000` adresini açın.
 - Action Text (`--skip-action-text`)
 - Active Job (`--skip-active-job`)
 - Action Cable (`--skip-action-cable`)
+- Action Storage (`--skip-active-storage`)
+- Active Record (`--skip-active-record`)
+- ...
 
 **Silinen Dosya ve Klasörler:**
 - `app/mailers/`

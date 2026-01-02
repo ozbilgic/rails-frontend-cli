@@ -27,25 +27,39 @@ Detaylı kullanım kılavuzu için [KULLANIM_KILAVUZU.md](KULLANIM_KILAVUZU.md) 
 
 ### Kurulum
 
-**Otomatik Kurulum (Önerilen):**
+**Tek Komutla Kurulum (Önerilen):**
 
 ```bash
-git clone https://github.com/ozbilgic/rails-frontend-cli.git
-cd rails-frontend-cli
-./install.sh
+bash <(curl -fsSL https://raw.githubusercontent.com/ozbilgic/rails-frontend-cli/main/install.sh)
+```
+
+Kurulum tamamlandıktan sonra shell'i yeniden yükleyin:
+
+```bash
 source ~/.bashrc  # veya source ~/.zshrc
 ```
 
 **Manuel Kurulum:**
 
-```bash
-git clone https://github.com/ozbilgic/rails-frontend-cli.git
-cd rails-frontend-cli
-chmod +x rails-frontend rails_frontend_setup.rb
+Eğer curl kullanamıyorsanız:
 
-# PATH'e ekleyin (~/.bashrc veya ~/.zshrc)
-export PATH="$PATH:$(pwd)"
-source ~/.bashrc
+```bash
+# Repository'yi klonlayın
+git clone https://github.com/ozbilgic/rails-frontend-cli.git ~/.rails-frontend-cli
+
+# Kurulum scriptini çalıştırın
+cd ~/.rails-frontend-cli
+./install.sh
+```
+
+### Kaldırma
+
+```bash
+# Kurulumu kaldırın
+rm -rf ~/.rails-frontend-cli
+
+# Shell yapılandırmasından PATH'i kaldırın (~/.bashrc veya ~/.zshrc)
+# "# Rails Frontend CLI" satırını ve altındaki export satırını silin
 ```
 
 ### Kurulumu Test Et

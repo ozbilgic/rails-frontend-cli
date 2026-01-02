@@ -540,8 +540,8 @@ class RailsFrontendCLI
   def cli_guncelle
     baslik_goster("Rails Frontend CLI Güncelleniyor")
     
-    # CLI'nin kurulu olduğu dizini bul
-    cli_path = File.expand_path('..', __FILE__)
+    # CLI'nin kurulu olduğu dizini bul (symlink'leri takip ederek)
+    cli_path = File.dirname(File.realpath(__FILE__))
     
     unless Dir.exist?(File.join(cli_path, '.git'))
       hata_mesaji("Bu CLI git repository'den kurulmamış. Manuel güncelleme gerekiyor.")
@@ -550,19 +550,39 @@ class RailsFrontendCLI
     puts "CLI dizini: #{renklendir(cli_path, :mavi)}"
     puts ""
     
-    # Mevcut branch'i kontrol et
-    mesaj_goster("Git durumu kontrol ediliyor...")
+    # Git dizinine geç
     Dir.chdir(cli_path) do
-      current_branch = `git rev-parse --abbrev-ref HEAD`.strip
+      # Mevcut branch'i kontrol et
+      mesaj_goster("Git durumu kontrol ediliyor...")
+      current_branch = `git rev-parse --abbrev-ref HEAD 2>/dev/null`.strip
+      
+      if current_branch.empty? || current_branch == "HEAD"
+        puts ""
+        hata_mesaji("Git branch bilgisi alınamadı. Lütfen kurulumu kontrol edin.")
+      end
+      
       puts "Mevcut branch: #{renklendir(current_branch, :mavi)}"
       basari_mesaji("Kontrol tamamlandı")
+      
+      # Yerel değişiklik kontrolü
+      mesaj_goster("Yerel değişiklikler kontrol ediliyor...")
+      git_status = `git status --porcelain 2>/dev/null`.strip
+      
+      unless git_status.empty?
+        puts ""
+        puts "#{renklendir('⚠', :sari)} Yerel değişiklikler bulundu:"
+        puts git_status
+        puts ""
+        hata_mesaji("Lütfen önce yerel değişikliklerinizi commit edin veya stash'leyin.")
+      end
+      basari_mesaji("Temiz")
       
       # Güncellemeleri kontrol et
       mesaj_goster("Güncellemeler kontrol ediliyor...")
       system("git fetch origin #{current_branch} 2>&1 > /dev/null")
       
-      local_commit = `git rev-parse HEAD`.strip
-      remote_commit = `git rev-parse origin/#{current_branch}`.strip
+      local_commit = `git rev-parse HEAD 2>/dev/null`.strip
+      remote_commit = `git rev-parse origin/#{current_branch} 2>/dev/null`.strip
       
       if local_commit == remote_commit
         basari_mesaji("Kontrol tamamlandı")
@@ -581,7 +601,7 @@ class RailsFrontendCLI
         basari_mesaji("Güncelleme tamamlandı")
         puts "\n#{renklendir('✓ CLI başarıyla güncellendi!', :yesil)}"
         puts ""
-        puts "Terminali yeniden başlatın veya #{renklendir('source ~/.bashrc', :mavi)} komutunu çalıştırın."
+        puts "Değişiklikler bir sonraki komutta aktif olacak."
         puts ""
       else
         puts ""
