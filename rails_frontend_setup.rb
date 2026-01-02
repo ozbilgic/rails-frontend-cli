@@ -565,7 +565,6 @@ class RailsFrontendCLI
       basari_mesaji("Kontrol tamamlandı")
       
       # Yerel değişiklik kontrolü
-      mesaj_goster("Yerel değişiklikler kontrol ediliyor...")
       git_status = `git status --porcelain 2>/dev/null`.strip
       
       unless git_status.empty?
@@ -575,7 +574,6 @@ class RailsFrontendCLI
         puts ""
         hata_mesaji("Lütfen önce yerel değişikliklerinizi commit edin veya stash'leyin.")
       end
-      basari_mesaji("Temiz")
       
       # Güncellemeleri kontrol et
       mesaj_goster("Güncellemeler kontrol ediliyor...")
