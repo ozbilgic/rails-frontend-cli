@@ -10,7 +10,7 @@ For detailed usage guide, see [USER_MANUAL.md](USER_MANUAL.md)
 
 ## Rails Frontend Coding Tutorial
 
-📚 [Training material](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny) (Turkish)
+📚 [Training material](https://gamma.app/docs/Frontend-Coding-Training-with-Rails-thatg6lvcpx4g7l) (English) | 📚 [Eğitim materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny) (Türkçe)
 
 ## Features
 
