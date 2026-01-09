@@ -11,672 +11,672 @@ class RailsFrontendCLI
   GITHUB   = "https://github.com/ozbilgic"
 
   def initialize
-    @proje_adi = nil
-    @sayfa_adi = nil
-    @komut = nil
+    @project_name = nil
+    @page_name = nil
+    @command = nil
     @clean_mode = false
   end
 
-  def calistir(args)
+  def run(args)
     if args.empty?
-      yardim_goster
+      show_help
       exit 0
     end
 
-    @komut = args[0]
+    @command = args[0]
 
-    case @komut
+    case @command
     when 'new', 'n'
-      @proje_adi = args[1]
-      if @proje_adi.nil? || @proje_adi.empty?
-        hata_mesaji("Proje adı belirtilmedi. Kullanım: rails-frontend new PROJE_ADI [--clean]")
+      @project_name = args[1]
+      if @project_name.nil? || @project_name.empty?
+        error_message("Project name not specified. Usage: rails-frontend new PROJECT_NAME [--clean]")
       end
-      # --clean parametresini kontrol et
+      # Check for --clean parameter
       @clean_mode = args.include?('--clean')
-      yeni_proje_olustur
+      create_new_project
     when 'add-page', 'ap'
-      @sayfa_adi = args[1]
-      if @sayfa_adi.nil? || @sayfa_adi.empty?
-        hata_mesaji("Sayfa adı belirtilmedi. Kullanım: rails-frontend add-page SAYFA_ADI")
+      @page_name = args[1]
+      if @page_name.nil? || @page_name.empty?
+        error_message("Page name not specified. Usage: rails-frontend add-page PAGE_NAME")
       end
-      sayfa_ekle
+      add_page
     when 'remove-page', 'rp'
-      @sayfa_adi = args[1]
-      if @sayfa_adi.nil? || @sayfa_adi.empty?
-        hata_mesaji("Sayfa adı belirtilmedi. Kullanım: rails-frontend remove-page SAYFA_ADI")
+      @page_name = args[1]
+      if @page_name.nil? || @page_name.empty?
+        error_message("Page name not specified. Usage: rails-frontend remove-page PAGE_NAME")
       end
-      sayfa_sil
+      remove_page
     when 'add-stimulus', 'as'
-      @controller_adi = args[1]
-      if @controller_adi.nil? || @controller_adi.empty?
-        hata_mesaji("Controller adı belirtilmedi. Kullanım: rails-frontend add-stimulus CONTROLLER_ADI")
+      @controller_name = args[1]
+      if @controller_name.nil? || @controller_name.empty?
+        error_message("Controller name not specified. Usage: rails-frontend add-stimulus CONTROLLER_NAME")
       end
-      stimulus_ekle
+      add_stimulus
     when 'remove-stimulus', 'rs'
-      @controller_adi = args[1]
-      if @controller_adi.nil? || @controller_adi.empty?
-        hata_mesaji("Controller adı belirtilmedi. Kullanım: rails-frontend remove-stimulus CONTROLLER_ADI")
+      @controller_name = args[1]
+      if @controller_name.nil? || @controller_name.empty?
+        error_message("Controller name not specified. Usage: rails-frontend remove-stimulus CONTROLLER_NAME")
       end
-      stimulus_sil
+      remove_stimulus
     when 'add-layout', 'al'
-      @layout_adi = args[1]
-      if @layout_adi.nil? || @layout_adi.empty?
-        hata_mesaji("Layout adı belirtilmedi. Kullanım: rails-frontend add-layout LAYOUT_ADI")
+      @layout_name = args[1]
+      if @layout_name.nil? || @layout_name.empty?
+        error_message("Layout name not specified. Usage: rails-frontend add-layout LAYOUT_NAME")
       end
-      layout_ekle
+      add_layout
     when 'remove-layout', 'rl'
-      @layout_adi = args[1]
-      if @layout_adi.nil? || @layout_adi.empty?
-        hata_mesaji("Layout adı belirtilmedi. Kullanım: rails-frontend remove-layout LAYOUT_ADI")
+      @layout_name = args[1]
+      if @layout_name.nil? || @layout_name.empty?
+        error_message("Layout name not specified. Usage: rails-frontend remove-layout LAYOUT_NAME")
       end
-      layout_sil
+      remove_layout
     when 'add-pin', 'pin'
-      @pin_adi = args[1]
-      if @pin_adi.nil? || @pin_adi.empty?
-        hata_mesaji("Pin adı belirtilmedi. Kullanım: rails-frontend add-pin PAKET_ADI")
+      @pin_name = args[1]
+      if @pin_name.nil? || @pin_name.empty?
+        error_message("Pin name not specified. Usage: rails-frontend add-pin PACKAGE_NAME")
       end
-      pin_ekle
+      add_pin
     when 'remove-pin', 'unpin'
-      @pin_adi = args[1]
-      if @pin_adi.nil? || @pin_adi.empty?
-        hata_mesaji("Pin adı belirtilmedi. Kullanım: rails-frontend remove-pin PAKET_ADI")
+      @pin_name = args[1]
+      if @pin_name.nil? || @pin_name.empty?
+        error_message("Pin name not specified. Usage: rails-frontend remove-pin PACKAGE_NAME")
       end
-      pin_sil
+      remove_pin
     when 'run', 'r'
-      server_calistir
+      run_server
     when 'build', 'b'
-      build_statik_site
+      build_static_site
     when 'update', 'u'
-      cli_guncelle
+      update_cli
     when 'version', '-v', '--version'
       puts "Rails Frontend CLI v#{VERSION}"
       exit 0
     when 'help', '-h', '--help'
-      yardim_goster
+      show_help
       exit 0
     else
-      hata_mesaji("Bilinmeyen komut: #{@komut}")
+      error_message("Unknown command: #{@command}")
     end
   end
 
   private
 
-  def yeni_proje_olustur
-    baslik_goster("Yeni Rails Frontend Projesi Oluşturuluyor: #{@proje_adi}")
+  def create_new_project
+    show_title("Creating New Rails Frontend Project: #{@project_name}")
 
-    # Rails projesinin zaten var olup olmadığını kontrol et
-    if Dir.exist?(@proje_adi)
-      hata_mesaji("'#{@proje_adi}' dizini zaten mevcut!")
+    # Check if Rails project already exists
+    if Dir.exist?(@project_name)
+      error_message("'#{@project_name}' directory already exists!")
     end
 
-    # Rails projesi oluştur
-    mesaj_goster("Rails projesi oluşturuluyor...")
+    # Create Rails project
+    show_message("Creating Rails project...")
     
-    # Clean mode'a göre komut oluştur
+    # Build command based on clean mode
     if @clean_mode
-      rails_komut = "rails new #{@proje_adi} --css=tailwind --javascript=importmap " \
+      rails_command = "rails new #{@project_name} --css=tailwind --javascript=importmap " \
                     "--skip-test --skip-system-test --skip-action-mailer " \
                     "--skip-action-mailbox --skip-action-text --skip-active-job " \
                     "--skip-action-cable --skip-active-storage --skip-active-record "\
                     "--skip-solid --skip-kamal --skip-docker"
     else
-      rails_komut = "rails new #{@proje_adi} --css=tailwind --javascript=importmap"
+      rails_command = "rails new #{@project_name} --css=tailwind --javascript=importmap"
     end
     
-    unless system(rails_komut)
-      hata_mesaji("Rails projesi oluşturulamadı!")
+    unless system(rails_command)
+      error_message("Failed to create Rails project!")
     end
-    basari_mesaji("Rails projesi oluşturuldu")
+    success_message("Rails project created")
 
-    # Proje dizinine geç
-    proje_dizini = File.expand_path(@proje_adi)
-    Dir.chdir(proje_dizini) do
-      # Gereksiz dosyaları temizle (eğer --clean parametresi varsa)
+    # Change to project directory
+    project_directory = File.expand_path(@project_name)
+    Dir.chdir(project_directory) do
+      # Clean unnecessary files (if --clean parameter exists)
       if @clean_mode
-        mesaj_goster("Gereksiz dosyalar temizleniyor...")
-        temizle_gereksiz_dosyalar
-        basari_mesaji("Gereksiz dosyalar temizlendi")
+        show_message("Cleaning unnecessary files...")
+        clean_unnecessary_files
+        success_message("Unnecessary files cleaned")
       end
 
-      # Home controller ve view oluştur
-      mesaj_goster("Home controller ve view oluşturuluyor...")
-      olustur_home_controller
-      basari_mesaji("Home controller ve view oluşturuldu")
+      # Create Home controller and view
+      show_message("Creating Home controller and view...")
+      create_home_controller
+      success_message("Home controller and view created")
 
-      # Shared componentler oluştur
-      mesaj_goster("Shared componentler oluşturuluyor...")
-      olustur_shared_componentler
-      basari_mesaji("Shared componentler oluşturuldu")
+      # Create shared components
+      show_message("Creating shared components...")
+      create_shared_components
+      success_message("Shared components created")
 
-      # CSS dosyaları oluştur
-      mesaj_goster("CSS dosyaları oluşturuluyor...")
-      olustur_css_dosyalari
-      basari_mesaji("CSS dosyaları oluşturuldu")
+      # Create CSS files
+      show_message("Creating CSS files...")
+      create_css_files
+      success_message("CSS files created")
 
-      # Asset klasörleri oluştur
-      mesaj_goster("Asset klasörleri oluşturuluyor...")
-      olustur_asset_klasorleri
-      basari_mesaji("Asset klasörleri oluşturuldu")
+      # Create asset folders
+      show_message("Creating asset folders...")
+      create_asset_folders
+      success_message("Asset folders created")
 
-      # Layout dosyasını güncelle
-      mesaj_goster("Layout dosyası güncelleniyor...")
-      guncelle_layout
-      basari_mesaji("Layout dosyası güncellendi")
+      # Update layout file
+      show_message("Updating layout file...")
+      update_layout
+      success_message("Layout file updated")
 
-      # Routes yapılandır
-      mesaj_goster("Routes yapılandırılıyor...")
-      guncelle_routes('home', 'index', root: true)
-      basari_mesaji("Routes yapılandırıldı")
+      # Configure routes
+      show_message("Configuring routes...")
+      update_routes('home', 'index', root: true)
+      success_message("Routes configured")
 
-      # Procfile.dev yapılandır
-      mesaj_goster("Procfile.dev yapılandırılıyor...")
-      guncelle_procfile
-      basari_mesaji("Procfile.dev yapılandırıldı")
+      # Configure Procfile.dev
+      show_message("Configuring Procfile.dev...")
+      update_procfile
+      success_message("Procfile.dev configured")
     end
 
-    tamamlandi_mesaji
+    completion_message
   end
 
-  def sayfa_ekle
-    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    rails_projesi_mi?
+  def add_page
+    # Check if current directory is a Rails project
+    is_rails_project?
 
-    baslik_goster("Yeni Sayfa Ekleniyor: #{@sayfa_adi}")
+    show_title("Adding New Page: #{@page_name}")
 
-    # Sayfa adını normalize et (türkçe karakterleri değiştir)
-    sayfa_adi_normalized = normalize_isim(@sayfa_adi)
+    # Normalize page name (convert Turkish characters)
+    page_name_normalized = normalize_name(@page_name)
 
-    # View oluştur (home klasöründe)
-    mesaj_goster("View dosyası oluşturuluyor...")
-    olustur_view(sayfa_adi_normalized)
-    basari_mesaji("View dosyası oluşturuldu")
+    # Create view (in home folder)
+    show_message("Creating view file...")
+    create_view(page_name_normalized)
+    success_message("View file created")
 
-    # CSS dosyası oluştur
-    mesaj_goster("CSS dosyası oluşturuluyor...")
-    olustur_css(sayfa_adi_normalized)
-    basari_mesaji("CSS dosyası oluşturuldu")
+    # Create CSS file
+    show_message("Creating CSS file...")
+    create_css(page_name_normalized)
+    success_message("CSS file created")
 
-    # Home controller'a action ekle
-    mesaj_goster("Home controller güncelleniyor...")
-    home_controller_action_ekle(sayfa_adi_normalized)
-    basari_mesaji("Home controller güncellendi")
+    # Add action to Home controller
+    show_message("Updating Home controller...")
+    add_home_controller_action(page_name_normalized)
+    success_message("Home controller updated")
 
-    # Route ekle
-    mesaj_goster("Route ekleniyor...")
-    guncelle_routes(sayfa_adi_normalized, sayfa_adi_normalized)
-    basari_mesaji("Route eklendi")
+    # Add route
+    show_message("Adding route...")
+    update_routes(page_name_normalized, page_name_normalized)
+    success_message("Route added")
 
-    puts "\n #{renklendir('Sayfa başarıyla eklendi!', :yesil)}"
-    puts "Sayfa URL: #{renklendir("/#{sayfa_adi_normalized}", :mavi)}"
+    puts "\n #{colorize('Page successfully added!', :green)}"
+    puts "Page URL: #{colorize("/#{page_name_normalized}", :blue)}"
   end
 
-  def sayfa_sil
-    rails_projesi_mi?
+  def remove_page
+    is_rails_project?
 
-    baslik_goster("Sayfa Siliniyor: #{@sayfa_adi}")
+    show_title("Removing Page: #{@page_name}")
 
-    sayfa_adi_normalized = normalize_isim(@sayfa_adi)
+    page_name_normalized = normalize_name(@page_name)
 
-    # Home/index sayfasını silmeyi engelle
-    if sayfa_adi_normalized == 'home' || sayfa_adi_normalized == 'index'
-      hata_mesaji("Ana sayfa (home/index) silinemez!")
+    # Prevent deletion of home/index page
+    if page_name_normalized == 'home' || page_name_normalized == 'index'
+      error_message("Home page (home/index) cannot be deleted!")
     end
 
-    # Dosyaların varlığını kontrol et
-    view_path = "app/views/home/#{sayfa_adi_normalized}.html.erb"
+    # Check file existence
+    view_path = "app/views/home/#{page_name_normalized}.html.erb"
     unless File.exist?(view_path)
-      hata_mesaji("'#{sayfa_adi_normalized}' sayfası bulunamadı!")
+      error_message("'#{page_name_normalized}' page not found!")
     end
 
-    # Onay al
-    print "#{renklendir('Emin misiniz?', :sari)} '#{sayfa_adi_normalized}' sayfası silinecek (e/h): "
-    onay = STDIN.gets.chomp.downcase
-    unless onay == 'y' || onay == 'yes' || onay == 'e' || onay == 'evet'
-      puts "İşlem iptal edildi."
+    # Get confirmation
+    print "#{colorize('Are you sure?', :yellow)} '#{page_name_normalized}' page will be deleted (y/n): "
+    confirmation = STDIN.gets.chomp.downcase
+    unless confirmation == 'y' || confirmation == 'yes'
+      puts "Operation cancelled."
       exit 0
     end
 
-    # View dosyasını sil
-    mesaj_goster("View dosyası siliniyor...")
+    # Delete view file
+    show_message("Deleting view file...")
     FileUtils.rm_f(view_path)
-    basari_mesaji("View dosyası silindi")
+    success_message("View file deleted")
 
-    # CSS dosyasını sil
-    mesaj_goster("CSS dosyası siliniyor...")
-    FileUtils.rm_f("app/assets/stylesheets/#{sayfa_adi_normalized}.css")
-    basari_mesaji("CSS dosyası silindi")
+    # Delete CSS file
+    show_message("Deleting CSS file...")
+    FileUtils.rm_f("app/assets/stylesheets/#{page_name_normalized}.css")
+    success_message("CSS file deleted")
 
-    # Home controller'dan action'ı kaldır
-    mesaj_goster("Home controller güncelleniyor...")
-    home_controller_action_kaldir(sayfa_adi_normalized)
-    basari_mesaji("Home controller güncellendi")
+    # Remove action from Home controller
+    show_message("Updating Home controller...")
+    remove_home_controller_action(page_name_normalized)
+    success_message("Home controller updated")
 
-    # Route'u kaldır
-    mesaj_goster("Route kaldırılıyor...")
-    kaldir_route(sayfa_adi_normalized)
-    basari_mesaji("Route kaldırıldı")
+    # Remove route
+    show_message("Removing route...")
+    remove_route(page_name_normalized)
+    success_message("Route removed")
 
-    puts "\n #{renklendir('Sayfa başarıyla silindi!', :yesil)}"
+    puts "\n #{colorize('Page successfully deleted!', :green)}"
   end
 
-  def stimulus_ekle
-    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    rails_projesi_mi?
+  def add_stimulus
+    # Check if current directory is a Rails project
+    is_rails_project?
 
-    baslik_goster("Stimulus Controller Oluşturuluyor: #{@controller_adi}")
+    show_title("Creating Stimulus Controller: #{@controller_name}")
 
-    # Controller adını normalize et
-    controller_adi_normalized = normalize_isim(@controller_adi)
+    # Normalize controller name
+    controller_name_normalized = normalize_name(@controller_name)
 
-    # Stimulus controller oluştur
-    mesaj_goster("Stimulus controller oluşturuluyor...")
-    olustur_stimulus_controller(controller_adi_normalized)
-    basari_mesaji("Stimulus controller oluşturuldu")
+    # Create Stimulus controller
+    show_message("Creating Stimulus controller...")
+    create_stimulus_controller(controller_name_normalized)
+    success_message("Stimulus controller created")
 
-    puts "\n #{renklendir('Stimulus controller başarıyla oluşturuldu!', :yesil)}"
-    puts "Dosya: #{renklendir("app/javascript/controllers/#{controller_adi_normalized}_controller.js", :mavi)}"
+    puts "\n #{colorize('Stimulus controller successfully created!', :green)}"
+    puts "File: #{colorize("app/javascript/controllers/#{controller_name_normalized}_controller.js", :blue)}"
   end
 
-  def stimulus_sil
-    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    rails_projesi_mi?
+  def remove_stimulus
+    # Check if current directory is a Rails project
+    is_rails_project?
 
-    baslik_goster("Stimulus Controller Siliniyor: #{@controller_adi}")
+    show_title("Removing Stimulus Controller: #{@controller_name}")
 
-    # Controller adını normalize et
-    controller_adi_normalized = normalize_isim(@controller_adi)
-    controller_file = "app/javascript/controllers/#{controller_adi_normalized}_controller.js"
+    # Normalize controller name
+    controller_name_normalized = normalize_name(@controller_name)
+    controller_file = "app/javascript/controllers/#{controller_name_normalized}_controller.js"
 
-    # Controller dosyasının varlığını kontrol et
+    # Check controller file existence
     unless File.exist?(controller_file)
-      hata_mesaji("Stimulus controller bulunamadı: #{controller_file}")
+      error_message("Stimulus controller not found: #{controller_file}")
     end
 
-    # View dosyalarında kullanım kontrolü
-    mesaj_goster("View dosyalarında kullanım kontrol ediliyor...")
-    kullanilan_dosyalar = []
+    # Check usage in view files
+    show_message("Checking usage in view files...")
+    used_files = []
     
     if Dir.exist?('app/views')
       Dir.glob('app/views/**/*.html.erb').each do |view_file|
         content = File.read(view_file)
-        # data-controller="controller_adi" veya data-controller='controller_adi' kontrolü
-        if content.match?(/data-controller=["'].*#{controller_adi_normalized}.*["']/)
-          kullanilan_dosyalar << view_file
+        # Check for data-controller="controller_name" or data-controller='controller_name'
+        if content.match?(/data-controller=["'].*#{controller_name_normalized}.*["']/)
+          used_files << view_file
         end
       end
     end
 
-    if kullanilan_dosyalar.any?
+    if used_files.any?
       puts "\n"
-      puts renklendir("UYARI: Bu controller aşağıdaki dosyalarda kullanılıyor:", :sari, bold: true)
-      kullanilan_dosyalar.each do |dosya|
-        puts "  - #{dosya}"
+      puts colorize("WARNING: This controller is being used in the following files:", :yellow, bold: true)
+      used_files.each do |file|
+        puts "  - #{file}"
       end
       puts "\n"
-      print renklendir("Yine de silmek istiyor musunuz? (e/h): ", :sari)
-      cevap = STDIN.gets.chomp.downcase
-      unless cevap == 'y' || cevap == 'yes' || cevap == 'e' || cevap == 'evet'
-        puts "\nİşlem iptal edildi."
+      print colorize("Do you still want to delete it? (y/n): ", :yellow)
+      answer = STDIN.gets.chomp.downcase
+      unless answer == 'y' || answer == 'yes'
+        puts "\nOperation cancelled."
         exit 0
       end
     end
-    basari_mesaji("Kontrol tamamlandı")
+    success_message("Check completed")
 
-    # Controller'ı sil
-    mesaj_goster("Stimulus controller siliniyor...")
+    # Delete controller
+    show_message("Deleting Stimulus controller...")
     FileUtils.rm_f(controller_file)
-    basari_mesaji("Stimulus controller silindi")
+    success_message("Stimulus controller deleted")
 
-    puts "\n #{renklendir('Stimulus controller başarıyla silindi!', :yesil)}"
+    puts "\n #{colorize('Stimulus controller successfully deleted!', :green)}"
   end
 
-  def layout_ekle
-    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    rails_projesi_mi?
+  def add_layout
+    # Check if current directory is a Rails project
+    is_rails_project?
 
-    baslik_goster("Layout Oluşturuluyor: #{@layout_adi}")
+    show_title("Creating Layout: #{@layout_name}")
 
-    # Layout adını normalize et
-    layout_adi_normalized = normalize_isim(@layout_adi)
+    # Normalize layout name
+    layout_name_normalized = normalize_name(@layout_name)
 
-    # Layout dosyasının zaten var olup olmadığını kontrol et
-    layout_file = "app/views/layouts/#{layout_adi_normalized}.html.erb"
+    # Check if layout file already exists
+    layout_file = "app/views/layouts/#{layout_name_normalized}.html.erb"
     if File.exist?(layout_file)
-      hata_mesaji("Layout zaten mevcut: #{layout_file}")
+      error_message("Layout already exists: #{layout_file}")
     end
 
-    # app/views/home klasöründeki dosyaları tara
-    mesaj_goster("View dosyaları taranıyor...")
-    home_views = home_views_listele
-    basari_mesaji("View dosyaları tarandı")
+    # Scan files in app/views/home folder
+    show_message("Scanning view files...")
+    home_views = list_home_views
+    success_message("View files scanned")
 
-    # Eşleşen view dosyası kontrolü
-    view_adi = nil
-    if home_views.include?(layout_adi_normalized)
-      # Eşleşen view var
-      view_adi = layout_adi_normalized
-      puts "\n#{renklendir("Eşleşen view dosyası bulundu: #{view_adi}.html.erb", :yesil)}"
+    # Check for matching view file
+    view_name = nil
+    if home_views.include?(layout_name_normalized)
+      # Matching view exists
+      view_name = layout_name_normalized
+      puts "\n#{colorize("Matching view file found: #{view_name}.html.erb", :green)}"
     else
-      # Eşleşen view yok, kullanıcıya sor
+      # No matching view, ask user
       if home_views.empty?
-        hata_mesaji("app/views/home klasöründe view dosyası bulunamadı!")
+        error_message("No view files found in app/views/home folder!")
       end
 
-      puts "\n#{renklendir("Bu layout hangi view ile kullanılacak?", :sari, bold: true)}"
+      puts "\n#{colorize("Which view will this layout be used with?", :yellow, bold: true)}"
       home_views.each_with_index do |view, index|
         puts "  #{index + 1}. #{view}"
       end
-      print "\nSeçim (1-#{home_views.length}): "
-      secim = STDIN.gets.chomp.to_i
+      print "\nChoice (1-#{home_views.length}): "
+      choice = STDIN.gets.chomp.to_i
 
-      if secim < 1 || secim > home_views.length
-        hata_mesaji("Geçersiz seçim!")
+      if choice < 1 || choice > home_views.length
+        error_message("Invalid choice!")
       end
 
-      view_adi = home_views[secim - 1]
+      view_name = home_views[choice - 1]
     end
 
-    # Aynı view için mevcut layout kontrolü
-    mesaj_goster("Mevcut layout kontrol ediliyor...")
-    mevcut_layout = view_icin_mevcut_layout_bul(view_adi)
-    if mevcut_layout
-      basari_mesaji("Kontrol tamamlandı")
-      hata_mesaji("'#{view_adi}' view'i için zaten bir layout tanımlı: '#{mevcut_layout}'\nÖnce mevcut layout'u kaldırın: rails-frontend remove-layout #{mevcut_layout}")
+    # Check for existing layout for the same view
+    show_message("Checking for existing layout...")
+    existing_layout = find_existing_layout_for_view(view_name)
+    if existing_layout
+      success_message("Check completed")
+      error_message("A layout is already defined for '#{view_name}' view: '#{existing_layout}'\nRemove the existing layout first: rails-frontend remove-layout #{existing_layout}")
     end
-    basari_mesaji("Kontrol tamamlandı")
+    success_message("Check completed")
 
-    # Layout dosyası oluştur
-    mesaj_goster("Layout dosyası oluşturuluyor...")
-    olustur_layout_dosyasi(layout_adi_normalized)
-    basari_mesaji("Layout dosyası oluşturuldu")
+    # Create layout file
+    show_message("Creating layout file...")
+    create_layout_file(layout_name_normalized)
+    success_message("Layout file created")
 
-    # Controller'a layout direktifi ekle
-    mesaj_goster("Home controller güncelleniyor...")
-    layout_direktifi_ekle(layout_adi_normalized, view_adi)
-    basari_mesaji("Home controller güncellendi")
+    # Add layout directive to controller
+    show_message("Updating Home controller...")
+    add_layout_directive(layout_name_normalized, view_name)
+    success_message("Home controller updated")
 
-    puts "\n #{renklendir('Layout başarıyla oluşturuldu!', :yesil)}"
-    puts "Layout dosyası: #{renklendir(layout_file, :mavi)}"
-    puts "Kullanılacağı view: #{renklendir("#{view_adi}.html.erb", :mavi)}"
+    puts "\n #{colorize('Layout successfully created!', :green)}"
+    puts "Layout file: #{colorize(layout_file, :blue)}"
+    puts "Will be used for view: #{colorize("#{view_name}.html.erb", :blue)}"
   end
 
-  def layout_sil
-    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    rails_projesi_mi?
+  def remove_layout
+    # Check if current directory is a Rails project
+    is_rails_project?
 
-    baslik_goster("Layout Siliniyor: #{@layout_adi}")
+    show_title("Removing Layout: #{@layout_name}")
 
-    # Layout adını normalize et
-    layout_adi_normalized = normalize_isim(@layout_adi)
-    layout_file = "app/views/layouts/#{layout_adi_normalized}.html.erb"
+    # Normalize layout name
+    layout_name_normalized = normalize_name(@layout_name)
+    layout_file = "app/views/layouts/#{layout_name_normalized}.html.erb"
 
-    # Layout dosyasının varlığını kontrol et
+    # Check layout file existence
     unless File.exist?(layout_file)
-      hata_mesaji("Layout bulunamadı: #{layout_file}")
+      error_message("Layout not found: #{layout_file}")
     end
 
-    # Onay iste
-    print renklendir("'#{layout_adi_normalized}' layout'unu silmek istediğinizden emin misiniz? (e/h): ", :sari)
-    cevap = STDIN.gets.chomp.downcase
-    unless cevap == 'y' || cevap == 'yes' || cevap == 'e' || cevap == 'evet'
-      puts "\nİşlem iptal edildi."
+    # Request confirmation
+    print colorize("Are you sure you want to delete '#{layout_name_normalized}' layout? (y/n): ", :yellow)
+    answer = STDIN.gets.chomp.downcase
+    unless answer == 'y' || answer == 'yes'
+      puts "\nOperation cancelled."
       exit 0
     end
 
-    # Controller'dan layout direktifini kaldır
-    mesaj_goster("Home controller güncelleniyor...")
-    layout_direktifi_kaldir(layout_adi_normalized)
-    basari_mesaji("Home controller güncellendi")
+    # Remove layout directive from controller
+    show_message("Updating Home controller...")
+    remove_layout_directive(layout_name_normalized)
+    success_message("Home controller updated")
 
-    # Layout dosyasını sil
-    mesaj_goster("Layout dosyası siliniyor...")
+    # Delete layout file
+    show_message("Deleting layout file...")
     FileUtils.rm_f(layout_file)
-    basari_mesaji("Layout dosyası silindi")
+    success_message("Layout file deleted")
 
-    puts "\n #{renklendir('Layout başarıyla silindi!', :yesil)}"
+    puts "\n #{colorize('Layout successfully deleted!', :green)}"
   end
 
-  def pin_ekle
-    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    rails_projesi_mi?
+  def add_pin
+    # Check if current directory is a Rails project
+    is_rails_project?
 
-    baslik_goster("Importmap Pin Ekleniyor: #{@pin_adi}")
+    show_title("Adding Importmap Pin: #{@pin_name}")
 
-    # bin/importmap dosyasının varlığını kontrol et
+    # Check bin/importmap file existence
     unless File.exist?('bin/importmap')
-      hata_mesaji("bin/importmap bulunamadı! Bu proje importmap kullanmıyor olabilir.")
+      error_message("bin/importmap not found! This project may not be using importmap.")
     end
 
-    # bin/importmap pin komutunu çalıştır
-    mesaj_goster("Pin ekleniyor...")
-    output = `bin/importmap pin #{@pin_adi} 2>&1`
+    # Run bin/importmap pin command
+    show_message("Adding pin...")
+    output = `bin/importmap pin #{@pin_name} 2>&1`
     
-    # Çıktıda hata kontrolü
+    # Check for errors in output
     if output.include?("Couldn't find") || output.include?("error") || output.include?("Error")
-      puts "" # Yeni satır
-      hata_mesaji("Pin eklenemedi! Paket bulunamadı: #{@pin_adi}")
+      puts "" # New line
+      error_message("Failed to add pin! Package not found: #{@pin_name}")
     end
     
-    basari_mesaji("Pin eklendi")
+    success_message("Pin added")
 
-    puts "\n #{renklendir('Pin başarıyla eklendi!', :yesil)}"
-    puts " #{renklendir('Kullanmak için projenize import etmeyi unutmayın!', :yesil)}"
-    puts "Paket: #{renklendir(@pin_adi, :mavi)}"
+    puts "\n #{colorize('Pin successfully added!', :green)}"
+    puts " #{colorize('Don\'t forget to import it in your project!', :green)}"
+    puts "Package: #{colorize(@pin_name, :blue)}"
   end
 
-  def pin_sil
-    # Mevcut dizinin Rails projesi olup olmadığını kontrol et
-    rails_projesi_mi?
+  def remove_pin
+    # Check if current directory is a Rails project
+    is_rails_project?
 
-    baslik_goster("Importmap Pin Siliniyor: #{@pin_adi}")
+    show_title("Removing Importmap Pin: #{@pin_name}")
 
-    # bin/importmap dosyasının varlığını kontrol et
+    # Check bin/importmap file existence
     unless File.exist?('bin/importmap')
-      hata_mesaji("bin/importmap bulunamadı! Bu proje importmap kullanmıyor olabilir.")
+      error_message("bin/importmap not found! This project may not be using importmap.")
     end
 
-    # JavaScript ve HTML dosyalarında kullanım kontrolü
-    mesaj_goster("Kullanım kontrol ediliyor...")
-    kullanilan_dosyalar = pin_kullanim_kontrol(@pin_adi)
-    basari_mesaji("Kontrol tamamlandı")
+    # Check usage in JavaScript and HTML files
+    show_message("Checking usage...")
+    used_files = check_pin_usage(@pin_name)
+    success_message("Check completed")
 
-    if kullanilan_dosyalar.any?
+    if used_files.any?
       puts "\n"
-      puts renklendir("UYARI: Bu paket aşağıdaki dosyalarda kullanılıyor:", :sari, bold: true)
-      kullanilan_dosyalar.each do |dosya|
-        puts "  - #{dosya}"
+      puts colorize("WARNING: This package is being used in the following files:", :yellow, bold: true)
+      used_files.each do |file|
+        puts "  - #{file}"
       end
       puts "\n"
-      print renklendir("Yine de silmek istiyor musunuz? (e/h): ", :sari)
-      cevap = STDIN.gets.chomp.downcase
-      unless cevap == 'y' || cevap == 'yes' || cevap == 'e' || cevap == 'evet'
-        puts "\nİşlem iptal edildi."
+      print colorize("Do you still want to delete it? (y/n): ", :yellow)
+      answer = STDIN.gets.chomp.downcase
+      unless answer == 'y' || answer == 'yes'
+        puts "\nOperation cancelled."
         exit 0
       end
     end
 
-    # Pin'in varlığını kontrol et
-    mesaj_goster("Pin kontrol ediliyor...")
+    # Check pin existence
+    show_message("Checking pin...")
     importmap_file = 'config/importmap.rb'
     unless File.exist?(importmap_file)
-      hata_mesaji("config/importmap.rb bulunamadı!")
+      error_message("config/importmap.rb not found!")
     end
     
     importmap_content = File.read(importmap_file)
-    unless importmap_content.match?(/pin\s+["']#{Regexp.escape(@pin_adi)}["']/)
-      puts "" # Yeni satır
-      hata_mesaji("Pin bulunamadı! '#{@pin_adi}' importmap'te tanımlı değil.")
+    unless importmap_content.match?(/pin\s+["']#{Regexp.escape(@pin_name)}["']/)
+      puts "" # New line
+      error_message("Pin not found! '#{@pin_name}' is not defined in importmap.")
     end
-    basari_mesaji("Pin bulundu")
+    success_message("Pin found")
 
-    # bin/importmap unpin komutunu çalıştır
-    mesaj_goster("Pin siliniyor...")
-    output = `bin/importmap unpin #{@pin_adi} 2>&1`
-    basari_mesaji("Pin silindi")
+    # Run bin/importmap unpin command
+    show_message("Removing pin...")
+    output = `bin/importmap unpin #{@pin_name} 2>&1`
+    success_message("Pin removed")
 
-    puts "\n #{renklendir('Pin başarıyla silindi!', :yesil)}"
+    puts "\n #{colorize('Pin successfully removed!', :green)}"
   end
 
-  # Helper metodlar
-  def rails_projesi_mi?
+  # Helper methods
+  def is_rails_project?
     unless File.exist?('config/routes.rb') && File.exist?('Gemfile')
-      hata_mesaji("Bu dizin bir Rails projesi değil! Lütfen Rails projesi içinde çalıştırın.")
+      error_message("This directory is not a Rails project! Please run inside a Rails project.")
     end
   end
 
-  def server_calistir
-    rails_projesi_mi?
+  def run_server
+    is_rails_project?
 
     unless File.exist?('bin/dev')
-      hata_mesaji("bin/dev dosyası bulunamadı! Bu proje Rails 7+ ile oluşturulmamış olabilir.")
+      error_message("bin/dev file not found! This project may not have been created with Rails 7+.")
     end
 
-    puts "\n#{renklendir('Rails server başlatılıyor...', :yesil, bold: true)}"
-    puts "#{renklendir('Durdurmak için Ctrl+C kullanın', :sari)}\n\n"
+    puts "\n#{colorize('Starting Rails server...', :green, bold: true)}"
+    puts "#{colorize('Use Ctrl+C to stop', :yellow)}\n\n"
     
     exec('bin/dev')
   end
 
-  def cli_guncelle
-    baslik_goster("Rails Frontend CLI Güncelleniyor")
+  def update_cli
+    show_title("Updating Rails Frontend CLI")
     
-    # CLI'nin kurulu olduğu dizini bul (symlink'leri takip ederek)
+    # Find the directory where CLI is installed (following symlinks)
     cli_path = File.dirname(File.realpath(__FILE__))
     
     unless Dir.exist?(File.join(cli_path, '.git'))
-      hata_mesaji("Bu CLI git repository'den kurulmamış. Manuel güncelleme gerekiyor.")
+      error_message("This CLI was not installed from a git repository. Manual update required.")
     end
     
-    puts "CLI dizini: #{renklendir(cli_path, :mavi)}"
+    puts "CLI directory: #{colorize(cli_path, :blue)}"
     puts ""
     
-    # Git dizinine geç
+    # Change to git directory
     Dir.chdir(cli_path) do
-      # Mevcut branch'i kontrol et
-      mesaj_goster("Git durumu kontrol ediliyor...")
+      # Check current branch
+      show_message("Checking git status...")
       current_branch = `git rev-parse --abbrev-ref HEAD 2>/dev/null`.strip
       
       if current_branch.empty? || current_branch == "HEAD"
         puts ""
-        hata_mesaji("Git branch bilgisi alınamadı. Lütfen kurulumu kontrol edin.")
+        error_message("Could not get git branch information. Please check installation.")
       end
       
-      puts "Mevcut branch: #{renklendir(current_branch, :mavi)}"
-      basari_mesaji("Kontrol tamamlandı")
+      puts "Current branch: #{colorize(current_branch, :blue)}"
+      success_message("Check completed")
       
-      # Yerel değişiklik kontrolü
+      # Check for local changes
       git_status = `git status --porcelain 2>/dev/null`.strip
       
       unless git_status.empty?
         puts ""
-        puts "#{renklendir('⚠', :sari)} Yerel değişiklikler bulundu:"
+        puts "#{colorize('⚠', :yellow)} Local changes found:"
         puts git_status
         puts ""
-        hata_mesaji("Lütfen önce yerel değişikliklerinizi commit edin veya stash'leyin.")
+        error_message("Please commit or stash your local changes first.")
       end
       
-      # Güncellemeleri kontrol et
-      mesaj_goster("Güncellemeler kontrol ediliyor...")
+      # Check for updates
+      show_message("Checking for updates...")
       system("git fetch origin #{current_branch} 2>&1 > /dev/null")
       
       local_commit = `git rev-parse HEAD 2>/dev/null`.strip
       remote_commit = `git rev-parse origin/#{current_branch} 2>/dev/null`.strip
       
       if local_commit == remote_commit
-        basari_mesaji("Kontrol tamamlandı")
-        puts "\n#{renklendir('✓', :yesil)} En güncel versiyonu kullanıyorsunuz! (v#{VERSION})"
+        success_message("Check completed")
+        puts "\n#{colorize('✓', :green)} You are using the latest version! (v#{VERSION})"
         puts ""
         return
       end
       
-      basari_mesaji("Yeni güncelleme bulundu")
+      success_message("New update found")
       
-      # Güncelleme yap
-      mesaj_goster("Güncelleme yapılıyor...")
+      # Perform update
+      show_message("Updating...")
       output = `git pull origin #{current_branch} 2>&1`
       
       if $?.success?
-        basari_mesaji("Güncelleme tamamlandı")
-        puts "\n#{renklendir('✓ CLI başarıyla güncellendi!', :yesil)}"
+        success_message("Update completed")
+        puts "\n#{colorize('✓ CLI successfully updated!', :green)}"
         puts ""
-        puts "Değişiklikler bir sonraki komutta aktif olacak."
+        puts "Changes will be active in the next command."
         puts ""
       else
         puts ""
-        hata_mesaji("Güncelleme başarısız oldu!\n#{output}")
+        error_message("Update failed!\n#{output}")
       end
     end
   end
 
-  def build_statik_site
-    rails_projesi_mi?
-    baslik_goster("Statik Dosyalar Oluşturuluyor")
+  def build_static_site
+    is_rails_project?
+    show_title("Building Static Files")
 
-    # Server kontrolü
-    mesaj_goster("Server kontrolü...")  
-    server = server_kontrol_et
-    unless server[:calisiyormu]
-      hata_mesaji("Rails server çalışmıyor! Önce 'rails-frontend run' ile başlatın.")
+    # Server check
+    show_message("Checking server...")  
+    server = check_server
+    unless server[:running]
+      error_message("Rails server is not running! Start it first with 'rails-frontend run'.")
     end
-    basari_mesaji("Server çalışıyor")
+    success_message("Server is running")
      
-    # Wget ile mirror
+    # Mirror with wget
     wget_mirror(server[:port])
 
-    # Build klasörü hazırlama
-    mesaj_goster("Build klasörü hazırlanıyor...")  
-    build_yapilandir
-    basari_mesaji("Build klasörü hazırlandı")
+    # Prepare build folder
+    show_message("Preparing build folder...")  
+    configure_build
+    success_message("Build folder prepared")
     
-    # Dosyaları taşı
-    mesaj_goster("Dosyalar organize ediliyor...")
-    tasi_assets_dosyalari
-    basari_mesaji("Dosyalar organize edildi")
+    # Move files
+    show_message("Organizing files...")
+    move_asset_files
+    success_message("Files organized")
     
-    # Path düzeltmeleri
-    mesaj_goster("Path düzeltmeleri yapılıyor...")
-    duzelt_html_pathleri(server[:port])
-    duzelt_css_pathleri
-    basari_mesaji("Path düzeltmeleri tamamlandı")
+    # Path corrections
+    show_message("Fixing paths...")
+    fix_html_paths(server[:port])
+    fix_css_paths
+    success_message("Path fixes completed")
     
-    # Temizlik
-    mesaj_goster("Gerekli olmayan bileşenler kaldırılıyor...")
-    temizle_html_dosyalari
-    basari_mesaji("Gerekli olmayan bileşenler kaldırıldı")
+    # Cleanup
+    show_message("Removing unnecessary components...")
+    clean_html_files
+    success_message("Unnecessary components removed")
     
-    puts "\n#{renklendir('✓ Statik site başarıyla oluşturuldu!', :yesil)}"
-    puts "Klasör: #{renklendir('build/', :mavi)}"
-    puts "\nTest etmek için:"
-    puts "  cd build && python3 -m http.server 8000 veya npx http-server -p 8000"
+    puts "\n#{colorize('✓ Static site successfully built!', :green)}"
+    puts "Folder: #{colorize('build/', :blue)}"
+    puts "\nTo test:"
+    puts "  cd build && python3 -m http.server 8000 or npx http-server -p 8000"
   end
 
-  # Build helper metodları
-  def server_kontrol_et
+  # Build helper methods
+  def check_server
     pid_file = 'tmp/pids/server.pid'
-    return { calisiyormu: false, port: nil } unless File.exist?(pid_file)
+    return { running: false, port: nil } unless File.exist?(pid_file)
 
     pid = File.read(pid_file).strip.to_i
 
     begin
-      # Port numarasını bul
+      # Find port number
       cmd = `ps -p #{pid} -o args=`.strip
       port = cmd[/tcp:\/\/[^:]+:(\d+)/, 1]
 
-      { calisiyormu: true, port: port.to_i }
+      { running: true, port: port.to_i }
     rescue Errno::ESRCH, Errno::EPERM
-      # Process bulunamadı veya erişim yok
-      { calisiyormu: false, port: nil }
+      # Process not found or no access
+      { running: false, port: nil }
     end
   end
 
   def wget_mirror(port)
-    # önceki build klasörünü sil
+    # Delete previous build folder
     FileUtils.rm_rf('build')
 
-    # wget'i sessizce çalıştır
+    # Run wget silently
     system("wget --mirror --convert-links --adjust-extension --page-requisites --no-parent --directory-prefix=build http://localhost:#{port}/ > /dev/null 2>&1")
     
-    # localhost:3000 klasörünü build/ içine taşı
+    # Move localhost:3000 folder into build/
     if Dir.exist?("build/localhost:#{port}")
       Dir.glob("build/localhost:#{port}/*").each do |file|
         FileUtils.mv(file, 'build/')
@@ -685,29 +685,29 @@ class RailsFrontendCLI
     end
   end
 
-  def build_yapilandir
+  def configure_build
     ['img', 'js', 'css', 'fonts'].each do |dir|
       FileUtils.mkdir_p("build/assets/#{dir}")
     end
   end
 
-  def tasi_assets_dosyalari
-    uzantilar = [ "{jpg,jpeg,png,gif,svg,webp,ico}", "js", "css", "{woff,woff2,ttf,eot,otf}" ]
-    dosyalar = [ "img", "js", "css", "fonts" ]
+  def move_asset_files
+    extensions = [ "{jpg,jpeg,png,gif,svg,webp,ico}", "js", "css", "{woff,woff2,ttf,eot,otf}" ]
+    folders = [ "img", "js", "css", "fonts" ]
 
-    uzantilar.zip(dosyalar).each do |uzanti, klasor|
-      Dir.glob("build/**/*.#{uzanti}").each do |file|
+    extensions.zip(folders).each do |extension, folder|
+      Dir.glob("build/**/*.#{extension}").each do |file|
         basename = File.basename(file)
-        dest = "build/assets/#{klasor}/#{basename}"
+        dest = "build/assets/#{folder}/#{basename}"
 
-        # Dosya varsa ve hedef yoksa taşı
+        # Move if file exists and destination doesn't
         if File.exist?(file) && !File.exist?(dest)
           FileUtils.mv(file, dest)
         end
       end
     end
 
-    # controllers klasörü varsa içindekileri taşı ve sil
+    # If controllers folder exists, move contents and delete
     if Dir.exist?("build/assets/controllers")
       Dir.glob("build/assets/controllers/*").each do |file|
         FileUtils.mv(file, 'build/assets/js/')
@@ -715,30 +715,30 @@ class RailsFrontendCLI
       FileUtils.rm_rf("build/assets/controllers")
     end
 
-    # turbo dosyalarını sil (bu dosya stimulus için gerekli olabilir şimdilik yoruma aldım)
+    # Delete turbo files (commented out for now as it may be needed for stimulus)
     # Dir.glob('**/*turbo.min*').each do |file|
     #   FileUtils.rm_rf(file)
     # end
   end
 
-  def duzelt_html_pathleri(port)
+  def fix_html_paths(port)
     Dir.glob('build/**/*.html').each do |file|
       content = File.read(file)
       
-      # 1. "assets/" içeren ve .js ile biten satırlara "assets/" den sonra "js/" ekle
-      # Örnek: assets/application-bfcdf840.js -> assets/js/application-bfcdf840.js
+      # 1. Add "js/" after "assets/" for lines containing "assets/" and ending with .js
+      # Example: assets/application-bfcdf840.js -> assets/js/application-bfcdf840.js
       content.gsub!(/assets\/([^\/\s"']+\.js)/, 'assets/js/\1')
       
-      # 2. "assets/controllers/" içeren ve .js ile biten satırlara "assets/controllers/" den sonra "js/" ekle
-      # Örnek: assets/controllers/index-ee64e1f1.js -> assets/js/index-ee64e1f1.js
+      # 2. Add "js/" after "assets/controllers/" for lines containing "assets/controllers/" and ending with .js
+      # Example: assets/controllers/index-ee64e1f1.js -> assets/js/index-ee64e1f1.js
       content.gsub!(/assets\/controllers\/([^\/\s"']+\.js)/, 'assets/js/\1')
       
-      # 3. "assets/" içeren ve .css ile biten satırlara "assets/" den sonra "css/" ekle
-      # Örnek: assets/application-72587725.css -> assets/css/application-72587725.css
+      # 3. Add "css/" after "assets/" for lines containing "assets/" and ending with .css
+      # Example: assets/application-72587725.css -> assets/css/application-72587725.css
       content.gsub!(/assets\/([^\/\s"']+\.css)/, 'assets/css/\1')
 
-      # 4. "assets/" içeren ve .jpg|jpeg|png|gif|svg|webp ile biten satırlara "assets/" den sonra "img/" ekle
-      # Örnek: assets/app-image-72587725.jpg -> assets/img/app-image-72587725.jpg
+      # 4. Add "img/" after "assets/" for lines containing "assets/" and ending with image extensions
+      # Example: assets/app-image-72587725.jpg -> assets/img/app-image-72587725.jpg
       content.gsub!(/assets\/([^\/\s"']+\.(jpg|jpeg|png|gif|svg|webp))/, 'assets/img/\1')
       content.gsub!(/http:\/\/localhost:#{port}\/([^\/\s"']+\.(jpg|jpeg|png|gif|svg|webp))/, 'assets/img/\1')
       
@@ -746,34 +746,34 @@ class RailsFrontendCLI
     end
   end
 
-  def duzelt_css_pathleri
+  def fix_css_paths
     Dir.glob('build/assets/css/**/*.css').each do |file|
       content = File.read(file)
       
-      # Font paths - absolute path kullan
-      # Örnek: url("LavishlyYours-Regular-c6da7860.ttf") -> url("/assets/fonts/LavishlyYours-Regular-c6da7860.ttf")
-      content.gsub!(/url\(["']?([^\/][^"'()]*\.(woff2?|ttf|eot|otf))["']?\)/, 'url("/assets/fonts/\1")')
+      # Font paths - use absolute path
+      # Example: url("LavishlyYours-Regular-c6da7860.ttf") -> url("/assets/fonts/LavishlyYours-Regular-c6da7860.ttf")
+      content.gsub!(/url\(["']?([^\/]["'()]*\.(woff2?|ttf|eot|otf))["']?\)/, 'url("/assets/fonts/\1")')
       
-      # Image paths - absolute path kullan
-      # Örnek: url("A-13904566-1761601378-8017-2b819c09.jpg") -> url("/assets/img/A-13904566-1761601378-8017-2b819c09.jpg")
-      content.gsub!(/url\(["']?([^\/][^"'()]*\.(jpg|jpeg|png|gif|svg|webp))["']?\)/, 'url("/assets/img/\1")')
+      # Image paths - use absolute path
+      # Example: url("A-13904566-1761601378-8017-2b819c09.jpg") -> url("/assets/img/A-13904566-1761601378-8017-2b819c09.jpg")
+      content.gsub!(/url\(["']?([^\/]["'()]*\.(jpg|jpeg|png|gif|svg|webp))["']?\)/, 'url("/assets/img/\1")')
       
       File.write(file, content)
     end
   end
 
-  def temizle_html_dosyalari
+  def clean_html_files
     Dir.glob('build/**/*.html').each do |file|
       content = File.read(file)
       
-      # index.html linkleri
+      # index.html links
       content.gsub!(/href="[^"]*\/index\.html"/, 'href="/"')
       content.gsub!(/href="index\.html"/, 'href="/"')
       
-      # Turbo kaldır (bu dosya stimulus için gerekli olabilir şimdilik yoruma aldım)
+      # Remove Turbo (commented out for now as it may be needed for stimulus)
       # content.gsub!(/^.*turbo\.min.*$\n?/, '')
       
-      # CSRF kaldır
+      # Remove CSRF
       content.gsub!(/<meta name="csrf-param"[^>]*>/, '')
       content.gsub!(/<meta name="csrf-token"[^>]*>/, '')
       
@@ -781,30 +781,30 @@ class RailsFrontendCLI
     end
   end
 
-  # Helper metodlar
-  def home_controller_action_ekle(sayfa_adi)
+  # Helper methods
+  def add_home_controller_action(page_name)
     controller_path = 'app/controllers/home_controller.rb'
     return unless File.exist?(controller_path)
 
-    # Küçük bir gecikme ekle (ardı ardına işlemler için) 
+    # Add small delay (for consecutive operations) 
     sleep(0.1)
 
     controller_content = File.read(controller_path)
     
-    # Action zaten varsa ekleme - kelime sınırı ile kontrol et
-    # "def urunle" ve "def urunler" ayrı ayrı algılansın
-    return if controller_content.match?(/^\s*def\s+#{Regexp.escape(sayfa_adi)}\s*$/)
+    # Don't add if action already exists - check with word boundary
+    # "def products" and "def product" should be detected separately
+    return if controller_content.match?(/^\s*def\s+#{Regexp.escape(page_name)}\s*$/)
 
-    # Class tanımını bul ve son end'den önce ekle
+    # Find class definition and add before last end
     lines = controller_content.split("\n")
     
-    # Son end satırının index'ini bul
+    # Find index of last end line
     last_end_index = lines.rindex { |line| line.strip == 'end' }
     
     if last_end_index
-      # Yeni action'ı son end'den önce ekle
+      # Add new action before last end
       new_action_lines = [
-        "  def #{sayfa_adi}",
+        "  def #{page_name}",
         "  end",
         ""
       ]
@@ -815,25 +815,25 @@ class RailsFrontendCLI
     end
   end
 
-  def home_controller_action_kaldir(sayfa_adi)
+  def remove_home_controller_action(page_name)
     controller_path = 'app/controllers/home_controller.rb'
     return unless File.exist?(controller_path)
 
     controller_content = File.read(controller_path)
     
-    # Action'ı kaldır
-    # "  def sayfa_adi" ile başlayan ve "  end" ile biten bloğu bul
-    controller_content.gsub!(/^\s*def #{Regexp.escape(sayfa_adi)}\s*$.*?^\s*end\s*$/m, '')
+    # Remove action
+    # Find block starting with "  def page_name" and ending with "  end"
+    controller_content.gsub!(/^\s*def #{Regexp.escape(page_name)}\s*$.*?^\s*end\s*$/m, '')
     
-    # Fazla boş satırları temizle (3'ten fazla ardışık boş satır varsa 2'ye düşür)
+    # Clean excessive blank lines (reduce to 2 if more than 3 consecutive blank lines)
     controller_content.gsub!(/\n{3,}/, "\n\n")
 
     File.write(controller_path, controller_content)
   end
 
-  def temizle_gereksiz_dosyalar
-    # Frontend için gereksiz dosya ve klasörleri sil
-    gereksiz_dosyalar = [
+  def clean_unnecessary_files
+    # Delete files and folders unnecessary for frontend
+    unnecessary_files = [
       '.github',
       'app/models',
       'app/javascript/controllers/hello_controller.js',
@@ -844,14 +844,14 @@ class RailsFrontendCLI
       'script'
     ]
 
-    gereksiz_dosyalar.each do |dosya|
-      # Mevcut olmayan klasör silme işlemi hata üretmesin
-      FileUtils.rm_rf(dosya) if File.exist?(dosya) || Dir.exist?(dosya)
+    unnecessary_files.each do |file|
+      # Don't error if non-existent folder deletion
+      FileUtils.rm_rf(file) if File.exist?(file) || Dir.exist?(file)
     end
   end
 
-  def normalize_isim(isim)
-    # Türkçe karakterleri değiştir ve küçük harfe çevir
+  def normalize_name(name)
+    # Convert Turkish characters and lowercase
     tr_map = {
       'ç' => 'c', 'Ç' => 'c',
       'ğ' => 'g', 'Ğ' => 'g',
@@ -861,30 +861,30 @@ class RailsFrontendCLI
       'ü' => 'u', 'Ü' => 'u'
     }
     
-    normalized = isim.downcase
+    normalized = name.downcase
     tr_map.each { |tr, en| normalized.gsub!(tr, en) }
     normalized.gsub(/[^a-z0-9_]/, '_')
   end
 
-  def uygulama_ismi_al
-    # config/application.rb dosyasından uygulama ismini oku
+  def get_application_name
+    # Read application name from config/application.rb file
     app_config_path = 'config/application.rb'
     if File.exist?(app_config_path)
       content = File.read(app_config_path)
-      # "module UygulamaIsmi" pattern'ini ara
+      # Search for "module ApplicationName" pattern
       match = content.match(/module\s+([A-Z][a-zA-Z0-9_]*)/)
       if match
-        # CamelCase'i başlık haline çevir (örn: MyApp -> My App)
+        # Convert CamelCase to title (e.g. MyApp -> My App)
         return match[1].gsub(/([A-Z]+)([A-Z][a-z])/, '\1 \2')
                       .gsub(/([a-z\d])([A-Z])/, '\1 \2')
       end
     end
     
-    # Fallback: Mevcut dizin ismini kullan
+    # Fallback: Use current directory name
     File.basename(Dir.pwd).split('_').map(&:capitalize).join(' ')
   end
 
-  def olustur_home_controller
+  def create_home_controller
     controller_content = <<~RUBY
       class HomeController < ApplicationController
         def index
@@ -895,7 +895,7 @@ class RailsFrontendCLI
     FileUtils.mkdir_p('app/controllers')
     File.write('app/controllers/home_controller.rb', controller_content)
 
-    # View klasörü ve dosyası oluştur
+    # Create view folder and file
     FileUtils.mkdir_p('app/views/home')
     view_content = <<~HTML
       <div>
@@ -903,17 +903,17 @@ class RailsFrontendCLI
           <div class="container mx-auto px-4 py-16">
             <div class="text-center">
               <h1 class="text-5xl font-bold text-gray-900 mb-4">
-                Hoş Geldiniz! 👋
+                Welcome! 👋
               </h1>
               <p class="text-xl text-gray-600 mb-8">
-                Rails Frontend CLI ile oluşturuldu
+                Created with Rails Frontend CLI
               </p>
               <div class="inline-block bg-white rounded-lg shadow-lg p-8">
                 <p class="text-gray-700 mb-4">
-                  Projeniz başarıyla oluşturuldu ve kullanıma hazır!
+                  Your project has been successfully created and is ready to use!
                 </p>
                 <p class="text-sm text-gray-500">
-                  Tailwind CSS ve Stimulus ile geliştirmeye başlayabilirsiniz.
+                  You can start developing with Tailwind CSS and Stimulus.
                 </p>
               </div>
             </div>
@@ -925,7 +925,7 @@ class RailsFrontendCLI
     File.write('app/views/home/index.html.erb', view_content)
   end
 
-  def olustur_shared_componentler
+  def create_shared_components
     FileUtils.mkdir_p('app/views/shared')
 
     # Header
@@ -946,103 +946,103 @@ class RailsFrontendCLI
     # Navbar
     navbar_content = <<~HTML
       <nav class="hidden md:flex space-x-6">
-        <%= link_to "Ana Sayfa", root_path, class: "text-gray-700 hover:text-indigo-600 transition" %>
-        <!-- Diğer menü öğeleri buraya eklenecek -->
+        <%= link_to "Home", root_path, class: "text-gray-700 hover:text-indigo-600 transition" %>
+        <!-- Other menu items will be added here -->
       </nav>
     HTML
     File.write('app/views/shared/_navbar.html.erb', navbar_content)
 
-    # Footer - Basit ve tam genişlikte
+    # Footer - Simple and full width
     footer_content = <<~HTML
       <footer class="bg-gray-800 text-white py-6 text-center">
         <p class="text-gray-400">
-          © <%= Time.current.year %> Tüm hakları saklıdır.
+          © <%= Time.current.year %> All rights reserved.
         </p>
       </footer>
     HTML
     File.write('app/views/shared/_footer.html.erb', footer_content)
   end
 
-  def olustur_css_dosyalari
+  def create_css_files
     FileUtils.mkdir_p('app/assets/stylesheets')
 
     # Home CSS
     home_css = <<~CSS
-      /* Home sayfası özel stilleri */
+      /* Home page custom styles */
       .home-container {
-        /* Buraya home sayfası için özel stiller eklenebilir */
+        /* Custom styles for home page can be added here */
       }
     CSS
     File.write('app/assets/stylesheets/home.css', home_css)
 
     # Header CSS
     header_css = <<~CSS
-      /* Header özel stilleri */
+      /* Header custom styles */
       header {
-        /* Buraya header için özel stiller eklenebilir */
+        /* Custom styles for header can be added here */
       }
     CSS
     File.write('app/assets/stylesheets/header.css', header_css)
 
     # Navbar CSS
     navbar_css = <<~CSS
-      /* Navbar özel stilleri */
+      /* Navbar custom styles */
       nav {
-        /* Buraya navbar için özel stiller eklenebilir */
+        /* Custom styles for navbar can be added here */
       }
     CSS
     File.write('app/assets/stylesheets/navbar.css', navbar_css)
 
     # Footer CSS
     footer_css = <<~CSS
-      /* Footer özel stilleri */
+      /* Footer custom styles */
       footer {
-        /* Buraya footer için özel stiller eklenebilir */
+        /* Custom styles for footer can be added here */
       }
     CSS
     File.write('app/assets/stylesheets/footer.css', footer_css)
   end
 
-  def olustur_stimulus_controller(sayfa_adi)
+  def create_stimulus_controller(page_name)
     FileUtils.mkdir_p('app/javascript/controllers')
 
     controller_content = <<~JS
       import { Controller } from "@hotwired/stimulus"
 
-      // #{sayfa_adi.capitalize} sayfası için Stimulus controller
+      // Stimulus controller for #{page_name.capitalize} page
       export default class extends Controller {
         connect() {
-          console.log("#{sayfa_adi.capitalize} controller bağlandı")
+          console.log("#{page_name.capitalize} controller connected")
         }
 
         disconnect() {
-          console.log("#{sayfa_adi.capitalize} controller bağlantısı kesildi")
+          console.log("#{page_name.capitalize} controller disconnected")
         }
 
-        // Buraya özel metodlar eklenebilir
+        // Custom methods can be added here
       }
     JS
 
-    File.write("app/javascript/controllers/#{sayfa_adi}_controller.js", controller_content)
+    File.write("app/javascript/controllers/#{page_name}_controller.js", controller_content)
   end
 
-  def olustur_asset_klasorleri
-    # Images klasörü
+  def create_asset_folders
+    # Images folder
     FileUtils.mkdir_p('app/assets/images')
     File.write('app/assets/images/.keep', '')
 
-    # Fonts klasörü
+    # Fonts folder
     FileUtils.mkdir_p('app/assets/fonts')
     File.write('app/assets/fonts/.keep', '')
   end
 
-  def guncelle_layout
+  def update_layout
     layout_path = 'app/views/layouts/application.html.erb'
     return unless File.exist?(layout_path)
 
     layout_content = File.read(layout_path)
 
-    # UTF-8 charset meta tag'ini ekle (eğer yoksa)
+    # Add UTF-8 charset meta tag (if not present)
     if !layout_content.match?(/<meta\s+charset\s*=\s*["']utf-8["']/i)
       layout_content.gsub!(/<\/title>/) do
         <<~HTML.chomp
@@ -1052,13 +1052,13 @@ class RailsFrontendCLI
       end
     end
 
-    # Önce mevcut main tag'lerini temizle
+    # First clean existing main tags
     layout_content.gsub!(/<main[^>]*>/, '')
     layout_content.gsub!(/<\/main>/, '')
 
-    # Body içine shared componentleri ekle
+    # Add shared components inside body
     if layout_content.include?('<body>')
-      yeni_layout = layout_content.gsub(/<body>/) do
+      new_layout = layout_content.gsub(/<body>/) do
         <<~HTML.chomp
           <body>
             <%= render 'shared/header' %>
@@ -1066,8 +1066,8 @@ class RailsFrontendCLI
         HTML
       end
 
-      # Yield'den sonra footer ekle
-      yeni_layout = yeni_layout.gsub(/\s*<%= yield %>/) do
+      # Add footer after yield
+      new_layout = new_layout.gsub(/\s*<%= yield %>/) do
         <<~HTML.chomp
           <%= yield %>
             </main>
@@ -1075,34 +1075,34 @@ class RailsFrontendCLI
         HTML
       end
 
-      File.write(layout_path, yeni_layout)
+      File.write(layout_path, new_layout)
     end
   end
 
-  def guncelle_routes(sayfa_adi, action, root: false)
+  def update_routes(page_name, action, root: false)
     routes_path = 'config/routes.rb'
     routes_content = File.read(routes_path)
 
     if root
-      # Root route ekle
-      yeni_route = "  root \"home##{action}\"\n"
+      # Add root route
+      new_route = "  root \"home##{action}\"\n"
       
-      # Mevcut root route varsa değiştir, yoksa ekle
+      # Replace if existing root route exists, otherwise add
       if routes_content.match?(/^\s*root/)
-        routes_content.gsub!(/^\s*root.*$/, yeni_route.strip)
+        routes_content.gsub!(/^\s*root.*$/, new_route.strip)
       else
         routes_content.gsub!(/Rails\.application\.routes\.draw do\n/) do |match|
-          "#{match}#{yeni_route}"
+          "#{match}#{new_route}"
         end
       end
     else
-      # Normal route ekle (home controller kullan)
-      yeni_route = "  get \"/#{sayfa_adi}\", to: \"home##{action}\"\n"
+      # Add normal route (use home controller)
+      new_route = "  get \"/#{page_name}\", to: \"home##{action}\"\n"
       
-      # Route zaten varsa ekleme
-      unless routes_content.include?(yeni_route.strip)
+      # Don't add if route already exists
+      unless routes_content.include?(new_route.strip)
         routes_content.gsub!(/Rails\.application\.routes\.draw do\n/) do |match|
-          "#{match}#{yeni_route}"
+          "#{match}#{new_route}"
         end
       end
     end
@@ -1110,59 +1110,59 @@ class RailsFrontendCLI
     File.write(routes_path, routes_content)
   end
 
-  def kaldir_route(sayfa_adi)
+  def remove_route(page_name)
     routes_path = 'config/routes.rb'
     routes_content = File.read(routes_path)
 
-    # Route satırını kaldır
-    routes_content.gsub!(/^\s*get\s+['"]\/#{sayfa_adi}['"].*\n/, '')
+    # Remove route line
+    routes_content.gsub!(/^\s*get\s+['"]\/#{page_name}['"].*\n/, '')
 
     File.write(routes_path, routes_content)
   end
 
-  def olustur_controller(sayfa_adi)
+  def create_controller(page_name)
     controller_content = <<~RUBY
-      class #{sayfa_adi.capitalize}Controller < ApplicationController
+      class #{page_name.capitalize}Controller < ApplicationController
         def index
         end
       end
     RUBY
 
-    File.write("app/controllers/#{sayfa_adi}_controller.rb", controller_content)
+    File.write("app/controllers/#{page_name}_controller.rb", controller_content)
   end
 
-  def olustur_view(sayfa_adi)
-    # Home klasöründe view oluştur
+  def create_view(page_name)
+    # Create view in Home folder
     FileUtils.mkdir_p("app/views/home")
 
     view_content = <<~HTML
       <div>
         <div class="container mx-auto px-4 py-16">
           <h1 class="text-4xl font-bold text-gray-900 mb-4">
-            #{sayfa_adi.capitalize}
+            #{page_name.capitalize}
           </h1>
           <p class="text-gray-600">
-            #{sayfa_adi.capitalize} sayfası içeriği buraya gelecek.
+            #{page_name.capitalize} page content will go here.
           </p>
         </div>
       </div>
     HTML
 
-    File.write("app/views/home/#{sayfa_adi}.html.erb", view_content)
+    File.write("app/views/home/#{page_name}.html.erb", view_content)
   end
 
-  def olustur_css(sayfa_adi)
+  def create_css(page_name)
     css_content = <<~CSS
-      /* #{sayfa_adi.capitalize} sayfası özel stilleri */
-      .#{sayfa_adi}-container {
-        /* Buraya #{sayfa_adi} sayfası için özel stiller eklenebilir */
+      /* #{page_name.capitalize} page custom styles */
+      .#{page_name}-container {
+        /* Custom styles for #{page_name} page can be added here */
       }
     CSS
 
-    File.write("app/assets/stylesheets/#{sayfa_adi}.css", css_content)
+    File.write("app/assets/stylesheets/#{page_name}.css", css_content)
   end
 
-  def guncelle_procfile
+  def update_procfile
     procfile_path = 'Procfile.dev'
     
     procfile_content = <<~PROCFILE
@@ -1173,30 +1173,30 @@ class RailsFrontendCLI
     File.write(procfile_path, procfile_content)
   end
 
-  def home_views_listele
+  def list_home_views
     views = []
     if Dir.exist?('app/views/home')
       Dir.glob('app/views/home/*.html.erb').each do |file|
         basename = File.basename(file, '.html.erb')
-        # index'i hariç tut
+        # Exclude index
         views << basename unless basename == 'index'
       end
     end
     views.sort
   end
 
-  def olustur_layout_dosyasi(layout_adi)
+  def create_layout_file(layout_name)
     FileUtils.mkdir_p('app/views/layouts')
     
     layout_content = <<~HTML
       <!DOCTYPE html>
       <html>
         <head>
-          <title><%= content_for(:title) || "#{layout_adi.capitalize}" %></title>
+          <title><%= content_for(:title) || "#{layout_name.capitalize}" %></title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width,initial-scale=1">
           <meta name="apple-mobile-web-app-capable" content="yes">
-          <meta name="application-name" content="#{uygulama_ismi_al}">
+          <meta name="application-name" content="#{get_application_name}">
           <meta name="mobile-web-app-capable" content="yes">
           <%= yield :head %>
           <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
@@ -1211,213 +1211,213 @@ class RailsFrontendCLI
       </html>
     HTML
 
-    File.write("app/views/layouts/#{layout_adi}.html.erb", layout_content)
+    File.write("app/views/layouts/#{layout_name}.html.erb", layout_content)
   end
 
-  def layout_direktifi_ekle(layout_adi, view_adi)
+  def add_layout_directive(layout_name, view_name)
     controller_file = 'app/controllers/home_controller.rb'
     unless File.exist?(controller_file)
-      hata_mesaji("Home controller bulunamadı: #{controller_file}")
+      error_message("Home controller not found: #{controller_file}")
     end
 
     controller_content = File.read(controller_file)
     
-    # Layout direktifi zaten var mı kontrol et
-    if controller_content.match?(/layout\s+["']#{layout_adi}["']/)
-      puts "\n#{renklendir("UYARI: Bu layout direktifi zaten mevcut!", :sari)}"
+    # Check if layout directive already exists
+    if controller_content.match?(/layout\s+["']#{layout_name}["']/)
+      puts "\n#{colorize("WARNING: This layout directive already exists!", :yellow)}"
       return
     end
 
-    # Class tanımından sonra layout direktifini ekle
-    layout_line = "  layout \"#{layout_adi}\", only: :#{view_adi}\n"
+    # Add layout directive after class definition
+    layout_line = "  layout \"#{layout_name}\", only: :#{view_name}\n"
     
     if controller_content.match?(/class\s+HomeController\s*<\s*ApplicationController\s*\n/)
       controller_content.sub!(/class\s+HomeController\s*<\s*ApplicationController\s*\n/) do |match|
         "#{match}#{layout_line}\n"
       end
     else
-      hata_mesaji("HomeController class tanımı bulunamadı!")
+      error_message("HomeController class definition not found!")
     end
 
     File.write(controller_file, controller_content)
   end
 
-  def layout_direktifi_kaldir(layout_adi)
+  def remove_layout_directive(layout_name)
     controller_file = 'app/controllers/home_controller.rb'
     unless File.exist?(controller_file)
-      hata_mesaji("Home controller bulunamadı: #{controller_file}")
+      error_message("Home controller not found: #{controller_file}")
     end
 
     controller_content = File.read(controller_file)
     
-    # Layout direktifini bul ve kaldır
-    controller_content.gsub!(/^\s*layout\s+["']#{layout_adi}["'].*\n/, '')
+    # Find and remove layout directive
+    controller_content.gsub!(/^\s*layout\s+["']#{layout_name}["'].*\n/, '')
     
     File.write(controller_file, controller_content)
   end
 
-  def view_icin_mevcut_layout_bul(view_adi)
+  def find_existing_layout_for_view(view_name)
     controller_file = 'app/controllers/home_controller.rb'
     return nil unless File.exist?(controller_file)
 
     controller_content = File.read(controller_file)
     
-    # layout "layout_adi", only: :view_adi pattern'ini ara
-    match = controller_content.match(/layout\s+["']([^"']+)["'].*only:\s*:#{view_adi}\b/)
+    # Search for layout "layout_name", only: :view_name pattern
+    match = controller_content.match(/layout\s+["']([^"']+)["'].*only:\s*:#{view_name}\b/)
     match ? match[1] : nil
   end
 
-  def pin_kullanim_kontrol(pin_adi)
-    kullanilan_dosyalar = []
+  def check_pin_usage(pin_name)
+    used_files = []
     
-    # JavaScript dosyalarında ara
+    # Search in JavaScript files
     if Dir.exist?('app/javascript')
       Dir.glob('app/javascript/**/*.js').each do |file|
         content = File.read(file)
-        # import veya from ile tam eşleşme kontrolü
-        # Örnek: from "alpinejs" veya import "chart.js" veya import Alpine from "alpinejs"
-        if content.match?(/from\s+["']#{Regexp.escape(pin_adi)}["']/) || 
-           content.match?(/import\s+["']#{Regexp.escape(pin_adi)}["']/) ||
-           content.match?(/import\s+.+\s+from\s+["']#{Regexp.escape(pin_adi)}["']/)
-          kullanilan_dosyalar << file
+        # Check for exact match with import or from
+        # Example: from "alpinejs" or import "chart.js" or import Alpine from "alpinejs"
+        if content.match?(/from\s+["']#{Regexp.escape(pin_name)}["']/) || 
+           content.match?(/import\s+["']#{Regexp.escape(pin_name)}["']/) ||
+           content.match?(/import\s+.+\s+from\s+["']#{Regexp.escape(pin_name)}["']/)
+          used_files << file
         end
       end
     end
     
-    # HTML/ERB dosyalarında ara
+    # Search in HTML/ERB files
     if Dir.exist?('app/views')
       Dir.glob('app/views/**/*.html.erb').each do |file|
         content = File.read(file)
-        # script tag içinde veya importmap içinde tam eşleşme kontrolü
-        # Tırnak içinde tam eşleşme arıyoruz
-        if content.match?(/["']#{Regexp.escape(pin_adi)}["']/)
-          kullanilan_dosyalar << file
+        # Check for exact match inside script tag or importmap
+        # Looking for exact match in quotes
+        if content.match?(/["']#{Regexp.escape(pin_name)}["']/)
+          used_files << file
         end
       end
     end
     
-    kullanilan_dosyalar.uniq
+    used_files.uniq
   end
 
-  # Mesaj metodları
-  def baslik_goster(mesaj)
-    puts renklendir(mesaj, :mavi, bold: true)
+  # Message methods
+  def show_title(message)
+    puts colorize(message, :blue, bold: true)
   end
 
-  def mesaj_goster(mesaj)
-    # Sadece mesajı göster, numara gösterme
-    print "  #{mesaj} "
+  def show_message(message)
+    # Just show message, no numbering
+    print "  #{message} "
   end
 
-  def basari_mesaji(mesaj)
-    puts renklendir('OK', :yesil)
+  def success_message(message)
+    puts colorize('OK', :green)
   end
 
-  def hata_mesaji(mesaj)
-    puts "\n#{renklendir('HATA:', :kirmizi)} #{mesaj}\n"
+  def error_message(message)
+    puts "\n#{colorize('ERROR:', :red)} #{message}\n"
     exit 1
   end
 
-  def tamamlandi_mesaji
-    puts renklendir("Proje başarıyla oluşturuldu!", :yesil, bold: true)
-    puts "\n#{renklendir('Sonraki adımlar:', :mavi)}"
-    puts "  1. cd #{@proje_adi}"
+  def completion_message
+    puts colorize("Project successfully created!", :green, bold: true)
+    puts "\n#{colorize('Next steps:', :blue)}"
+    puts "  1. cd #{@project_name}"
     puts "  2. rails-frontend run"
-    puts "  3. Tarayıcıda http://localhost:3000 adresini açın"
-    puts "\n#{renklendir('Yardım için:', :mavi)}"
+    puts "  3. Open http://localhost:3000 in your browser"
+    puts "\n#{colorize('For help:', :blue)}"
     puts "  rails-frontend --help"
     puts ""
   end
 
-  def yardim_goster
-    baslik_goster("Rails Frontend CLI v#{VERSION}")
+  def show_help
+    show_title("Rails Frontend CLI v#{VERSION}")
     
-    puts renklendir("Frontend geliştiriciler için Rails proje yönetim aracı", :mavi)
+    puts colorize("Rails project management tool for frontend developers", :blue)
     puts ""
-    puts renklendir("KULLANIM:", :sari, bold: true)
-    puts "  rails-frontend KOMUT [PARAMETRELER]"
+    puts colorize("USAGE:", :yellow, bold: true)
+    puts "  rails-frontend COMMAND [PARAMETERS]"
     puts ""
     
-    puts renklendir("KOMUTLAR:", :sari, bold: true)
-    puts <<~KOMUTLAR
-      Proje Yönetimi:
-        new, n PROJE_ADI [--clean]  Yeni Rails frontend projesi oluştur
-        build, b                    Statik site oluştur
-        run, r                      Server başlat (bin/dev)
+    puts colorize("COMMANDS:", :yellow, bold: true)
+    puts <<~COMMANDS
+      Project Management:
+        new, n PROJECT_NAME [--clean]  Create new Rails frontend project
+        build, b                       Build static site
+        run, r                         Start server (bin/dev)
         
-      Sayfa Yönetimi:
-        add-page, ap SAYFA_ADI      Yeni sayfa ekle (view + CSS + route)
-        remove-page, rp SAYFA_ADI   Sayfa sil
+      Page Management:
+        add-page, ap PAGE_NAME         Add new page (view + CSS + route)
+        remove-page, rp PAGE_NAME      Remove page
         
       Stimulus Controller:
-        add-stimulus, as CONTROLLER Stimulus controller ekle
-        remove-stimulus, rs CONTROLLER Stimulus controller sil (kullanım kontrolü yapar)
+        add-stimulus, as CONTROLLER    Add Stimulus controller
+        remove-stimulus, rs CONTROLLER Remove Stimulus controller (checks usage)
         
-      Layout Yönetimi:
-        add-layout, al LAYOUT_ADI   Layout ekle (view eşleştirme ile)
-        remove-layout, rl LAYOUT_ADI Layout sil
+      Layout Management:
+        add-layout, al LAYOUT_NAME     Add layout (with view matching)
+        remove-layout, rl LAYOUT_NAME  Remove layout
         
-      JavaScript Kütüphaneleri:
-        add-pin, pin PAKET_ADI      Harici JavaScript kütüphanesi ekle
-        remove-pin, unpin PAKET_ADI Harici JavaScript kütüphanesi sil (kullanım kontrolü yapar)
+      JavaScript Libraries:
+        add-pin, pin PACKAGE_NAME      Add external JavaScript library
+        remove-pin, unpin PACKAGE_NAME Remove external JavaScript library (checks usage)
         
-      Bilgi:
-        update, u                   CLI'yi güncelle (git pull)
-        version, -v, --version      Versiyon bilgisi göster
-        help, -h, --help            Bu yardım mesajını göster
-    KOMUTLAR
+      Info:
+        update, u                      Update CLI (git pull)
+        version, -v, --version         Show version info
+        help, -h, --help               Show this help message
+    COMMANDS
     
-    puts renklendir("SEÇENEKLER:", :sari, bold: true)
-    puts "  --clean                     Frontend için gereksiz dosyaları temizle"
-    puts "                              (test, mailers, jobs, channels, models vb.)"
+    puts colorize("OPTIONS:", :yellow, bold: true)
+    puts "  --clean                     Clean unnecessary files for frontend"
+    puts "                              (tests, mailers, jobs, channels, models etc.)"
     puts ""
     
-    puts renklendir("ÖRNEKLER:", :sari, bold: true)
-    puts <<~ORNEKLER
-      Yeni proje oluştur:
+    puts colorize("EXAMPLES:", :yellow, bold: true)
+    puts <<~EXAMPLES
+      Create new project:
         rails-frontend new blog --clean
         
-      Sayfa ekle:
-        rails-frontend add-page hakkımızda
+      Add page:
+        rails-frontend add-page about
         
-      Layout ekle:
-        rails-frontend add-layout iletisim
+      Add layout:
+        rails-frontend add-layout contact
         
-      JavaScript kütüphanesi ekle:
+      Add JavaScript library:
         rails-frontend add-pin sweetalert2
         
-      Stimulus controller ekle:
+      Add Stimulus controller:
         rails-frontend add-stimulus dropdown
         
-      Server başlat:
+      Start server:
         rails-frontend run
-    ORNEKLER
+    EXAMPLES
     
-    puts renklendir("DAHA FAZLA BİLGİ:", :mavi)
-    puts "  Detaylı kullanım kılavuzu: KULLANIM_KILAVUZU.md"
+    puts colorize("MORE INFO:", :blue)
+    puts "  Detailed usage guide: USAGE_GUIDE.md"
     puts "  GitHub: https://github.com/ozbilgic/rails-frontend-cli"
     puts ""
   end
 
-  def renklendir(metin, renk, bold: false)
-    renkler = {
-      kirmizi: 31,
-      yesil: 32,
-      sari: 33,
-      mavi: 34,
+  def colorize(text, color, bold: false)
+    colors = {
+      red: 31,
+      green: 32,
+      yellow: 33,
+      blue: 34,
       magenta: 35,
       cyan: 36
     }
 
-    renk_kodu = renkler[renk] || 37
-    bold_kodu = bold ? '1;' : ''
+    color_code = colors[color] || 37
+    bold_code = bold ? '1;' : ''
     
-    "\e[#{bold_kodu}#{renk_kodu}m#{metin}\e[0m"
+    "\e[#{bold_code}#{color_code}m#{text}\e[0m"
   end
 end
 
-# Script olarak çalıştırıldığında
+# When run as a script
 if __FILE__ == $0
   cli = RailsFrontendCLI.new
-  cli.calistir(ARGV)
+  cli.run(ARGV)
 end
