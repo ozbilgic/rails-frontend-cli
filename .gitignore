@@ -13,3 +13,9 @@ merge_all.sh
 .idea/
 .vscode/
 *.sublime-*
+
+# Gem build artifacts
+*.gem
+.bundle/
+Gemfile.lock
+pkg/

@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'rails_frontend_cli'
+
+cli = RailsFrontendCLI.new
+cli.run(ARGV)

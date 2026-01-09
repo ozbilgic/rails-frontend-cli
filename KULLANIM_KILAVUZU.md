@@ -1,5 +1,7 @@
 # Rails Frontend CLI - Kullanım Kılavuzu
 
+**Türkçe** | [English](USER_MANUAL.md)
+
 Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukça kolaylaştıran, ruby yada rails bilinmesine gerek kalmadan rails ile frontend kodlamayı sevdiren bir araç.
 
 ## Rails ile Frontend Kodlama Eğitimi
@@ -8,39 +10,15 @@ Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukç
 
 ### Kurulum
 
-**Tek Komutla Kurulum (Önerilen):**
-
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/ozbilgic/rails-frontend-cli/main/install.sh)
-```
-
-Kurulum tamamlandıktan sonra shell'i yeniden yükleyin:
-
-```bash
-source ~/.bashrc  # veya source ~/.zshrc
-```
-
-**Manuel Kurulum:**
-
-Eğer curl kullanamıyorsanız:
-
-```bash
-# Repository'yi klonlayın
-git clone https://github.com/ozbilgic/rails-frontend-cli.git ~/.rails-frontend-cli
-
-# Kurulum scriptini çalıştırın
-cd ~/.rails-frontend-cli
-./install.sh
+gem install rails-frontend-cli
 ```
 
 ### Kaldırma
 
 ```bash
-# Kurulumu kaldırın
-rm -rf ~/.rails-frontend-cli
-
-# Shell yapılandırmasından PATH'i kaldırın (~/.bashrc veya ~/.zshrc)
-# "# Rails Frontend CLI" satırını ve altındaki export satırını silin
+# Gem kurulumunu kaldırın
+gem uninstall rails-frontend-cli
 ```
 
 ### Kurulumu Test Et
@@ -48,8 +26,6 @@ rm -rf ~/.rails-frontend-cli
 ```bash
 # Yeni versiyon bilgisi için:
 rails-frontend --version
-# veya
-rails-frontend version
 ```
 
 ## Kullanım
@@ -154,7 +130,7 @@ rails-frontend run
 rails-frontend build
 
 # Build klasörünü test et
-cd build && npx http-server -p 8000
+cd build && python3 -m http.server or npx http-server
 ```
 
 **Oluşturulan Klasör Yapısı:**
@@ -305,12 +281,6 @@ rails-frontend remove-pin sweetalert2
 3. Pin'in `config/importmap.rb`'de olup olmadığını kontrol eder
 4. Kullanılıyorsa kullanıcıya uyarı gösterir ve onay ister
 
-### CLI Güncelleme
-
-```bash
-rails-frontend update
-```
-
 ## Proje Yapısı
 
 Yeni oluşturulan projeler şu yapıya sahiptir:
@@ -344,7 +314,7 @@ proje_adi/
 │       └── controllers/
 │           └── home_controller.js
 └── config/
-    └── routes.rb (root ayarlanmış)
+    └── routes.rb (root otomatik yapılandırılır)
 ```
 
 ## Tailwind CSS Kullanımı
@@ -451,12 +421,8 @@ Dilediğiniz gibi düzenleyebilirsiniz.
 
 **Çözüm:**
 ```bash
-# PATH'e eklendiğinden emin olun
-echo $PATH | grep rails-frontend-cli
-
-# Yoksa ~/.bashrc veya ~/.zshrc'ye ekleyin
-export PATH="$PATH:$(pwd)"
-source ~/.bashrc
+# gem'i yüklediğinizden emin olun
+gem install rails-frontend-cli
 ```
 
 ### 2. Tailwind CSS çalışmıyor
@@ -475,8 +441,7 @@ bin/rails tailwindcss:build
 
 **Çözüm:**
 ```bash
-# JavaScript'leri yeniden derleyin (Proje klasöründeyken)
-bin/rails assets:precompile
+# controller dosyanızın ismini kontrol edin
 ```
 
 ### 4. Türkçe karakter sorunları
@@ -528,7 +493,7 @@ Levent Özbilgiç
 
 ## Lisans
 
-GPLv3
+MIT
 
 ---
 

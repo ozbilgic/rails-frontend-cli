@@ -1,139 +1,113 @@
 # Rails Frontend CLI
 
-Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukça kolaylaştıran, ruby yada rails bilinmesine gerek kalmadan rails ile frontend kodlamayı sevdiren bir araç.
+**English** | [Türkçe](README_tr.md)  
 
-## Dokümantasyon
+A CLI tool that makes frontend development with Rails incredibly easy, allowing you to enjoy Rails frontend coding without needing to know Ruby or Rails.
 
-Detaylı kullanım kılavuzu için [KULLANIM_KILAVUZU.md](KULLANIM_KILAVUZU.md) dosyasına bakın.
+## Documentation
 
-## Rails ile Frontend Kodlama Eğitimi
+For detailed usage guide, see [USER_MANUAL.md](USER_MANUAL.md)
 
-📚 [Eğitim materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
+## Rails Frontend Coding Tutorial
 
-## Özellikler
+📚 [Training material](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny) (Turkish)
 
-✅ Rails 7+ ile uyumlu  
-✅ Tailwind CSS otomatik yapılandırma  
-✅ Stimulus controller desteği  
-✅ Shared componentler (header, navbar, footer)  
-✅ Layout ekleme desteği  
-✅ Harici javascript kütüphanesi ekleme desteği  
-✅ Otomatik route yapılandırması  
-✅ CSS dosyaları otomatik import  
-✅ Asset klasörleri (images, fonts)  
-✅ Türkçe dokümantasyon  
+## Features
 
-## Hızlı Başlangıç
+✅ Compatible with Rails 7+  
+✅ Automatic Tailwind CSS configuration  
+✅ Stimulus controller support  
+✅ Shared components (header, navbar, footer)  
+✅ Layout management support  
+✅ External JavaScript library management  
+✅ Automatic route configuration  
+✅ Automatic CSS file imports  
+✅ Asset folders (images, fonts)  
+✅ Multi-language documentation  
 
-### Kurulum
+## Quick Start
 
-**Tek Komutla Kurulum (Önerilen):**
-
-```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/ozbilgic/rails-frontend-cli/main/install.sh)
-```
-
-Kurulum tamamlandıktan sonra shell'i yeniden yükleyin:
+### Installation
 
 ```bash
-source ~/.bashrc  # veya source ~/.zshrc
+gem install rails-frontend-cli
 ```
 
-**Manuel Kurulum:**
-
-Eğer curl kullanamıyorsanız:
+### Uninstallation
 
 ```bash
-# Repository'yi klonlayın
-git clone https://github.com/ozbilgic/rails-frontend-cli.git ~/.rails-frontend-cli
-
-# Kurulum scriptini çalıştırın
-cd ~/.rails-frontend-cli
-./install.sh
+gem uninstall rails-frontend-cli
 ```
 
-### Kaldırma
-
-```bash
-# Kurulumu kaldırın
-rm -rf ~/.rails-frontend-cli
-
-# Shell yapılandırmasından PATH'i kaldırın (~/.bashrc veya ~/.zshrc)
-# "# Rails Frontend CLI" satırını ve altındaki export satırını silin
-```
-
-### Kurulumu Test Et
+### Test Installation
 
 ```bash
 rails-frontend --version
-# veya
-rails-frontend version
 ```
 
-### Kullanım
+### Usage
 
 ```bash
-# Yeni proje oluştur (temiz frontend - önerilen)
-# Frontend için gerekli olmayan dosyalar oluşturulmaz
+# Create new project (clean frontend - recommended)
+# Unnecessary files for frontend won't be created
 rails-frontend new blog --clean
 cd blog
 rails-frontend run
 
-# Sayfa ekle
-rails-frontend add-page hakkimizda
-rails-frontend add-page iletisim
+# Add pages
+rails-frontend add-page about
+rails-frontend add-page contact
 
-# Stimulus controller ekle
+# Add Stimulus controllers
 rails-frontend add-stimulus dropdown
 rails-frontend add-stimulus modal
 
-# Sayfa sil
-rails-frontend remove-page iletisim
+# Remove page
+rails-frontend remove-page contact
 
-# Stimulus controller sil (kullanım kontrolü yapar)
+# Remove Stimulus controller (checks usage)
 rails-frontend remove-stimulus dropdown
 
-# Layout ekle
-rails-frontend add-layout iletisim
+# Add layout
+rails-frontend add-layout contact
 
-# Layout sil
-rails-frontend remove-layout iletisim
+# Remove layout
+rails-frontend remove-layout contact
 
-# Harici javascript kütüphanesi ekle
+# Add external JavaScript library
 rails-frontend add-pin alpinejs
 rails-frontend add-pin sweetalert2
 
-# Harici javascript kütüphanesi sil (kullanım kontrolü yapar)
+# Remove external JavaScript library (checks usage)
 rails-frontend remove-pin alpinejs
 rails-frontend remove-pin sweetalert2
 ```
 
-**`--clean` Parametresi:**
-Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, channels, models, vb.). Frontend odaklı projeler için önerilir.
+**`--clean` Parameter:**
+Removes unnecessary Rails features for frontend (tests, mailers, jobs, channels, models, etc.). Recommended for frontend-focused projects.
 
-## Komutlar
+## Commands
 
-| Komut | Kısa | Açıklama |
-|-------|------|----------|
-| `rails-frontend new PROJE [--clean]` | `n` | Yeni proje oluştur |
-| `rails-frontend add-page SAYFA` | `ap` | Sayfa ekle |
-| `rails-frontend remove-page SAYFA` | `rp` | Sayfa sil |
-| `rails-frontend add-stimulus CONTROLLER` | `as` | Stimulus controller ekle |
-| `rails-frontend remove-stimulus CONTROLLER` | `rs` | Stimulus controller sil |
-| `rails-frontend add-layout LAYOUT` | `al` | Layout ekle |
-| `rails-frontend remove-layout LAYOUT` | `rl` | Layout sil |
-| `rails-frontend add-pin PAKET` | `pin` | Harici javascript kütüphanesi ekle |
-| `rails-frontend remove-pin PAKET` | `unpin` | Harici javascript kütüphanesi sil |
-| `rails-frontend update` | `u` | CLI'yi güncelle |
-| `rails-frontend run` | `r` | Server başlat |
-| `rails-frontend build` | `b` | Statik site oluştur |
-| `rails-frontend version` | `-v` | Versiyon göster |
-| `rails-frontend help` | `-h` | Yardım göster |
+| Command | Short | Description |
+|---------|-------|-------------|
+| `rails-frontend new PROJECT [--clean]` | `n` | Create new project |
+| `rails-frontend add-page PAGE` | `ap` | Add page |
+| `rails-frontend remove-page PAGE` | `rp` | Remove page |
+| `rails-frontend add-stimulus CONTROLLER` | `as` | Add Stimulus controller |
+| `rails-frontend remove-stimulus CONTROLLER` | `rs` | Remove Stimulus controller |
+| `rails-frontend add-layout LAYOUT` | `al` | Add layout |
+| `rails-frontend remove-layout LAYOUT` | `rl` | Remove layout |
+| `rails-frontend add-pin PACKAGE` | `pin` | Add external JavaScript library |
+| `rails-frontend remove-pin PACKAGE` | `unpin` | Remove external JavaScript library |
+| `rails-frontend run` | `r` | Start server |
+| `rails-frontend build` | `b` | Build static site |
+| `rails-frontend version` | `-v` | Show version |
+| `rails-frontend help` | `-h` | Show help |
 
-**Seçenekler:**
-- `--clean`: Frontend için gereksiz dosyaları temizle (önerilen)
+**Options:**
+- `--clean`: Clean unnecessary files for frontend (recommended)
 
-## Gereksinimler
+## Requirements
 
 - Ruby 3.0+
 - Rails 7+
@@ -143,6 +117,6 @@ Frontend için gereksiz Rails özelliklerini kaldırır (test, mailers, jobs, ch
 Levent Özbilgiç  
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/leventozbilgic/)
 
-## Lisans
+## License
 
-GPLv3
+MIT

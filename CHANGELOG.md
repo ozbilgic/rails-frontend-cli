@@ -1,135 +1,132 @@
-# Versiyon Geçmişi
+# Changelog
+
+[Türkçe](CHANGELOG_tr.md) | **English**
 
 ## v1.0.4
 
-### Yeni Özellikler
-- **Statik Site Oluşturma:**
-  - `rails-frontend build` komutu eklendi (kısa: `b`)
-  - Asset organizasyonu (img, js, css, fonts klasörleri)
-  - Otomatik path düzeltmeleri (HTML ve CSS)
-  - HTML temizliği (csrf, index.html linkleri)
-  - Statik hosting için hazır çıktı
+### New Features
+- **Static Site Generation:**
+  - Added `rails-frontend build` command (short: `b`)
+  - Asset organization (img, js, css, fonts folders)
+  - Automatic path corrections (HTML and CSS)
+  - HTML cleanup (csrf, index.html links)
+  - Ready output for static hosting
 
-### Geliştirmeler
-- Server kontrolü (build işlemine başlamadan sunucu ve port tespiti yapılır)
-- Asset klasör yapısı: `build/assets/{img,js,css,fonts}/`
-- HTML dosyalarında path düzeltmeleri:
+### Improvements
+- Server check (detects server and port before build process)
+- Asset folder structure: `build/assets/{img,js,css,fonts}/`
+- Path corrections in HTML files:
   - `assets/application.js` → `assets/js/application.js`
   - `assets/controllers/index.js` → `assets/js/index.js`
   - `assets/application.css` → `assets/css/application.css`
-- CSS dosyalarında absolute path kullanımı:
+- Absolute path usage in CSS files:
   - Font: `url("font.woff2")` → `url("/assets/fonts/font.woff2")`
   - Image: `url("image.jpg")` → `url("/assets/img/image.jpg")`
-- CSRF temizliği
-- index.html link düzeltmeleri
+- CSRF cleanup
+- index.html link corrections
 
-### Dokümantasyon
-- README.md güncellendi
-- KULLANIM_KILAVUZU.md'ye statik site oluşturma bölümü eklendi
-- Yardım mesajı güncellendi
-- Komut referansı tabloları güncellendi
+### Documentation
+- README.md updated
+- Static site generation section added to USER_MANUAL.md
+- Help message updated
+- Command reference tables updated
 
 ---
 
 ## v1.0.3
 
-### Yeni Özellikler
-- **Harici Javascript Yönetimi:**
-  - `rails-frontend add-pin PAKET_ADI` komutu eklendi (kısa: `pin`)
-  - `rails-frontend remove-pin PAKET_ADI` komutu eklendi (kısa: `unpin`)
-  - Paket bulunamadığında hata kontrolü
-  - Pin silmeden önce kullanım kontrolü (JavaScript ve HTML dosyalarında)
-  - Tam eşleşme kontrolü (kısmi eşleşmeler göz ardı edilir)
-- **CLI Güncelleme:**
-  - `rails-frontend update` komutu eklendi (kısa: `u`)
-  - Git pull ile otomatik güncelleme
-  - Güncelleme kontrolü ve bilgilendirme
+### New Features
+- **External JavaScript Management:**
+  - Added `rails-frontend add-pin PACKAGE_NAME` command (short: `pin`)
+  - Added `rails-frontend remove-pin PACKAGE_NAME` command (short: `unpin`)
+  - Error check when package not found
+  - Usage check before removing pin (in JavaScript and HTML files)
+  - Exact match check (partial matches ignored)
 
-### Geliştirmeler
-- JavaScript dosyalarında import kontrolü (`app/javascript/**/*.js`)
-- HTML dosyalarında kullanım kontrolü (`app/views/**/*.html.erb`)
-- Pin varlık kontrolü (`config/importmap.rb`)
-- Kullanıcıya import hatırlatması
-- Hata mesajları iyileştirildi
+### Improvements
+- Import check in JavaScript files (`app/javascript/**/*.js`)
+- Usage check in HTML files (`app/views/**/*.html.erb`)
+- Pin existence check (`config/importmap.rb`)
+- Import reminder to user
+- Improved error messages
 
-### Dokümantasyon
-- README.md güncellendi
-- KULLANIM_KILAVUZU.md'ye harici javascript yönetimi bölümü eklendi
-- Komut referansı tabloları güncellendi
-- Rails ile Frontend Kodlama Eğitim materyali eklendi.
+### Documentation
+- README.md updated
+- External JavaScript management section added to USER_MANUAL.md
+- Command reference tables updated
+- Rails Frontend Coding training material added
 
 ---
 
 ## v1.0.2
 
-### Yeni Özellikler
-- **Layout Yönetimi:**
-  - `rails-frontend add-layout LAYOUT_ADI` komutu eklendi (kısa: `al`)
-  - `rails-frontend remove-layout LAYOUT_ADI` komutu eklendi (kısa: `rl`)
-  - Otomatik view eşleştirme (layout adı ile view adı eşleşiyorsa)
-  - Kullanıcıya view seçimi sorma (eşleşme yoksa)
-  - Aynı view için çift layout kontrolü
-  - Controller'a otomatik layout direktifi ekleme/kaldırma
+### New Features
+- **Layout Management:**
+  - Added `rails-frontend add-layout LAYOUT_NAME` command (short: `al`)
+  - Added `rails-frontend remove-layout LAYOUT_NAME` command (short: `rl`)
+  - Automatic view matching (if layout name matches view name)
+  - Ask user for view selection (if no match)
+  - Duplicate layout check for same view
+  - Automatic layout directive add/remove to controller
 
-### Geliştirmeler
-- Layout dosyası oluşturma (`app/views/layouts/`)
-- `home_controller.rb`'ye `layout "layout_adi", only: :view_adi` direktifi ekleme
-- Layout silme öncesi onay mekanizması
-- Mevcut layout kontrolü ile çakışma önleme
+### Improvements
+- Layout file creation (`app/views/layouts/`)
+- Add `layout "layout_name", only: :view_name` directive to `home_controller.rb`
+- Confirmation mechanism before layout removal
+- Prevent conflicts with existing layout check
 
-### Dokümantasyon
-- README.md güncellendi
-- KULLANIM_KILAVUZU.md'ye layout yönetimi bölümü eklendi
-- Komut referansı tabloları güncellendi
+### Documentation
+- README.md updated
+- Layout management section added to USER_MANUAL.md
+- Command reference tables updated
 
 ---
 
 ## v1.0.1
 
-### Yeni Özellikler
-- **Stimulus Controller Yönetimi:**
-  - `rails-frontend add-stimulus CONTROLLER_ADI` komutu eklendi (kısa: `as`)
-  - `rails-frontend remove-stimulus CONTROLLER_ADI` komutu eklendi (kısa: `ds`)
-  - Stimulus controller silme öncesi view dosyalarında kullanım kontrolü
-  - Kullanılan controller'lar için uyarı ve onay mekanizması
+### New Features
+- **Stimulus Controller Management:**
+  - Added `rails-frontend add-stimulus CONTROLLER_NAME` command (short: `as`)
+  - Added `rails-frontend remove-stimulus CONTROLLER_NAME` command (short: `ds`)
+  - Usage check in view files before removing Stimulus controller
+  - Warning and confirmation mechanism for used controllers
 
-### Geliştirmeler
-- Dokümantasyon güncellendi (README.md ve KULLANIM_KILAVUZU.md)
-- Komut referansı tabloları güncellendi
-- Stimulus controller örnekleri eklendi
+### Improvements
+- Documentation updated (README.md and USER_MANUAL.md)
+- Command reference tables updated
+- Stimulus controller examples added
 
 ---
 
-## v1.0.0 (İlk Sürüm)
+## v1.0.0 (Initial Release)
 
-### Temel Özellikler
-- **Proje Oluşturma:**
-  - `rails-frontend new PROJE_ADI` komutu
-  - `--clean` parametresi ile frontend odaklı proje oluşturma
-  - Otomatik Tailwind CSS yapılandırması
-  - Shared componentler (header, navbar, footer)
+### Core Features
+- **Project Creation:**
+  - `rails-frontend new PROJECT_NAME` command
+  - Frontend-focused project creation with `--clean` parameter
+  - Automatic Tailwind CSS configuration
+  - Shared components (header, navbar, footer)
 
-- **Sayfa Yönetimi:**
-  - `rails-frontend add-page SAYFA_ADI` komutu
-  - `rails-frontend remove-page SAYFA_ADI` komutu
-  - Otomatik view, CSS ve route oluşturma
+- **Page Management:**
+  - `rails-frontend add-page PAGE_NAME` command
+  - `rails-frontend remove-page PAGE_NAME` command
+  - Automatic view, CSS and route creation
  
-- **Geliştirme Araçları:**
-  - `rails-frontend run` komutu (server başlatma)
-  - Türkçe karakter desteği (otomatik normalize)
-  - Asset klasörleri (images, fonts)
+- **Development Tools:**
+  - `rails-frontend run` command (start server)
+  - Turkish character support (automatic normalize)
+  - Asset folders (images, fonts)
 
-- **Temizlik Özellikleri (`--clean`):**
-  - Test dosyalarını atlama
-  - Gereksiz Rails özelliklerini kaldırma (mailers, jobs, channels, models)
+- **Cleanup Features (`--clean`):**
+  - Skip test files
+  - Remove unnecessary Rails features (mailers, jobs, channels, models)
 
-### Dokümantasyon
-- Türkçe README.md
-- Detaylı KULLANIM_KILAVUZU.md
-- Otomatik kurulum scripti (install.sh)
+### Documentation
+- README.md
+- Detailed USER_MANUAL.md
 
-### Teknik Detaylar
-- Rails 7+ uyumluluğu
-- Ruby 3.0+ desteği
-- Tailwind CSS v4 entegrasyonu
-- Stimulus framework desteği
+### Technical Details
+- Rails 7+ compatibility
+- Ruby 3.0+ support
+- Tailwind CSS integration
+- Stimulus framework support

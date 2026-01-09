@@ -86,8 +86,6 @@ class RailsFrontendCLI
       run_server
     when 'build', 'b'
       build_static_site
-    when 'update', 'u'
-      update_cli
     when 'version', '-v', '--version'
       puts "Rails Frontend CLI v#{VERSION}"
       exit 0
@@ -267,6 +265,12 @@ class RailsFrontendCLI
 
     # Normalize controller name
     controller_name_normalized = normalize_name(@controller_name)
+    controller_file = "app/javascript/controllers/#{controller_name_normalized}_controller.js"
+
+    # Check if controller file already exists
+    if File.exist?(controller_file)
+      error_message("Stimulus controller already exists: #{controller_file}")
+    end
 
     # Create Stimulus controller
     show_message("Creating Stimulus controller...")
@@ -300,7 +304,9 @@ class RailsFrontendCLI
       Dir.glob('app/views/**/*.html.erb').each do |view_file|
         content = File.read(view_file)
         # Check for data-controller="controller_name" or data-controller='controller_name'
-        if content.match?(/data-controller=["'].*#{controller_name_normalized}.*["']/)
+        # Also check for data: { controller: "controller_name" } pattern
+        if content.match?(/data-controller=["'].*#{controller_name_normalized}.*["']/) ||
+           content.match?(/data:\s*\{[^}]*controller:\s*["']#{controller_name_normalized}["'][^}]*\}/)
           used_files << view_file
         end
       end
@@ -537,77 +543,6 @@ class RailsFrontendCLI
     exec('bin/dev')
   end
 
-  def update_cli
-    show_title("Updating Rails Frontend CLI")
-    
-    # Find the directory where CLI is installed (following symlinks)
-    cli_path = File.dirname(File.realpath(__FILE__))
-    
-    unless Dir.exist?(File.join(cli_path, '.git'))
-      error_message("This CLI was not installed from a git repository. Manual update required.")
-    end
-    
-    puts "CLI directory: #{colorize(cli_path, :blue)}"
-    puts ""
-    
-    # Change to git directory
-    Dir.chdir(cli_path) do
-      # Check current branch
-      show_message("Checking git status...")
-      current_branch = `git rev-parse --abbrev-ref HEAD 2>/dev/null`.strip
-      
-      if current_branch.empty? || current_branch == "HEAD"
-        puts ""
-        error_message("Could not get git branch information. Please check installation.")
-      end
-      
-      puts "Current branch: #{colorize(current_branch, :blue)}"
-      success_message("Check completed")
-      
-      # Check for local changes
-      git_status = `git status --porcelain 2>/dev/null`.strip
-      
-      unless git_status.empty?
-        puts ""
-        puts "#{colorize('⚠', :yellow)} Local changes found:"
-        puts git_status
-        puts ""
-        error_message("Please commit or stash your local changes first.")
-      end
-      
-      # Check for updates
-      show_message("Checking for updates...")
-      system("git fetch origin #{current_branch} 2>&1 > /dev/null")
-      
-      local_commit = `git rev-parse HEAD 2>/dev/null`.strip
-      remote_commit = `git rev-parse origin/#{current_branch} 2>/dev/null`.strip
-      
-      if local_commit == remote_commit
-        success_message("Check completed")
-        puts "\n#{colorize('✓', :green)} You are using the latest version! (v#{VERSION})"
-        puts ""
-        return
-      end
-      
-      success_message("New update found")
-      
-      # Perform update
-      show_message("Updating...")
-      output = `git pull origin #{current_branch} 2>&1`
-      
-      if $?.success?
-        success_message("Update completed")
-        puts "\n#{colorize('✓ CLI successfully updated!', :green)}"
-        puts ""
-        puts "Changes will be active in the next command."
-        puts ""
-      else
-        puts ""
-        error_message("Update failed!\n#{output}")
-      end
-    end
-  end
-
   def build_static_site
     is_rails_project?
     show_title("Building Static Files")
@@ -647,7 +582,7 @@ class RailsFrontendCLI
     puts "\n#{colorize('✓ Static site successfully built!', :green)}"
     puts "Folder: #{colorize('build/', :blue)}"
     puts "\nTo test:"
-    puts "  cd build && python3 -m http.server 8000 or npx http-server -p 8000"
+    puts "  cd build && python3 -m http.server or npx http-server"
   end
 
   # Build helper methods
@@ -1362,7 +1297,6 @@ class RailsFrontendCLI
         remove-pin, unpin PACKAGE_NAME Remove external JavaScript library (checks usage)
         
       Info:
-        update, u                      Update CLI (git pull)
         version, -v, --version         Show version info
         help, -h, --help               Show this help message
     COMMANDS
@@ -1394,7 +1328,7 @@ class RailsFrontendCLI
     EXAMPLES
     
     puts colorize("MORE INFO:", :blue)
-    puts "  Detailed usage guide: USAGE_GUIDE.md"
+    puts "  Detailed user manual: USER_MANUAL.md"
     puts "  GitHub: https://github.com/ozbilgic/rails-frontend-cli"
     puts ""
   end
