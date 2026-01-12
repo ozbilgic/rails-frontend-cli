@@ -4,9 +4,9 @@
 
 Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukça kolaylaştıran, ruby yada rails bilinmesine gerek kalmadan rails ile frontend kodlamayı sevdiren bir araç.
 
-## Rails ile Frontend Kodlama Eğitimi
+## Rails ile Frontend Kodlama Kursu (Ücretsiz)
 
-📚 [Eğitim materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
+📚 [Kurs materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
 
 ### Kurulum
 

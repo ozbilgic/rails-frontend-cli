@@ -4,9 +4,9 @@
 
 A CLI tool that makes frontend development with Rails incredibly easy, allowing you to enjoy Rails frontend coding without needing to know Ruby or Rails.
 
-## Rails Frontend Coding Tutorial
+## Rails Frontend Coding Course (Free)
 
-📚 [Training material](https://gamma.app/docs/Frontend-Coding-Training-with-Rails-thatg6lvcpx4g7l) (English)
+📚 [Course material](https://gamma.app/docs/Frontend-Coding-Training-with-Rails-thatg6lvcpx4g7l) (English)
 
 ### Installation
 

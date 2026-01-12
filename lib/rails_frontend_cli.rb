@@ -5,7 +5,7 @@ require 'fileutils'
 require 'optparse'
 
 class RailsFrontendCLI
-  VERSION  = "1.0.4"
+  VERSION  = "1.0.5"
   AUTHOR   = "Levent Özbilgiç"
   LINKEDIN = "https://www.linkedin.com/in/leventozbilgic/"
   GITHUB   = "https://github.com/ozbilgic"
@@ -605,6 +605,12 @@ class RailsFrontendCLI
   end
 
   def wget_mirror(port)
+    # Check if wget is installed
+    unless system("which wget > /dev/null 2>&1")
+      puts "" # New line
+      error_message("wget is not installed! The build feature requires wget.\n\nPlease install wget:\n  - Ubuntu/Debian: sudo apt-get install wget\n  - macOS: brew install wget\n  - Fedora: sudo dnf install wget")
+    end
+
     # Delete previous build folder
     FileUtils.rm_rf('build')
 

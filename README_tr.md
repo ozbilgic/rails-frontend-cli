@@ -8,9 +8,9 @@ Rails Frontend CLI aracı frontend kodlama yapan programcıların işini oldukç
 
 Detaylı kullanım kılavuzu için [KULLANIM_KILAVUZU.md](KULLANIM_KILAVUZU.md) dosyasına bakın.
 
-## Rails ile Frontend Kodlama Eğitimi
+## Rails ile Frontend Kodlama Kursu (Ücretsiz)
 
-📚 [Eğitim materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
+📚 [Kurs materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny)
 
 ## Özellikler
 

@@ -1,6 +1,13 @@
 # Changelog
 
-[Türkçe](CHANGELOG_tr.md) | **English**
+## v1.0.5
+
+### Improvements
+- **Build Command:**
+  - Added wget availability check before running `rails-frontend build` command
+  - Clear error message with installation instructions if wget is not installed
+
+---
 
 ## v1.0.4
 

@@ -8,9 +8,9 @@ A CLI tool that makes frontend development with Rails incredibly easy, allowing 
 
 For detailed usage guide, see [USER_MANUAL.md](USER_MANUAL.md)
 
-## Rails Frontend Coding Tutorial
+## Rails Frontend Coding Course (Free)
 
-📚 [Training material](https://gamma.app/docs/Frontend-Coding-Training-with-Rails-thatg6lvcpx4g7l) (English) | 📚 [Eğitim materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny) (Türkçe)
+📚 [Course material](https://gamma.app/docs/Frontend-Coding-Training-with-Rails-thatg6lvcpx4g7l) (English) | 📚 [Kurs materyali](https://gamma.app/docs/Rails-ile-Frontend-Kodlama-Egitimi-i6q19pjb2jpw9ny) (Türkçe)
 
 ## Features
 

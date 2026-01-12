@@ -9,7 +9,10 @@ Gem::Specification.new do |spec|
   spec.email = ["ozbilgiclevent@gmail.com"]
 
   spec.summary = "CLI tool for frontend development with Rails"
-  spec.description = "Rails Frontend CLI is a command-line tool that enables fast and easy development of Rails projects for frontend developers. Rails Frontend CLI is a tool that makes frontend coding with Rails enjoyable, even without prior knowledge of Ruby or Rails."
+  spec.description = "Rails Frontend CLI is a command-line tool that enables fast and easy development of 
+                      Rails projects for frontend developers and frontend coding with Rails enjoyable, 
+                      even without prior knowledge of Ruby or Rails. I've created a free course on this 
+                      topic. You can find the course on the GitHub homepage for this CLI."
   spec.homepage = "https://github.com/ozbilgic/rails-frontend-cli"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
